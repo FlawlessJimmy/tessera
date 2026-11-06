@@ -30,12 +30,18 @@ const bar = document.querySelector('.ld-bar i');
 let shown = 0, target = 0, done = false, laid = 0;
 addEventListener('tessera:progress', (e) => { target = Math.max(target, e.detail * 0.96); });
 addEventListener('tessera:ready', () => { target = 1; });
+let lastName = 0;
 function setName(t) {
+  // 너무 빨리 바뀌면 글자가 겹치니 0.14초에 한 번만 바꿉니다
+  const now = performance.now();
+  if (now - lastName < 140 && laid < LD.length - 1) return;
+  lastName = now;
+  while (nameBox.children.length > 1) nameBox.firstElementChild.remove();
+  const old = nameBox.firstElementChild;
   const b = document.createElement('b'); b.textContent = t;
   nameBox.appendChild(b);
-  gsap.fromTo(b, { yPercent: 100 }, { yPercent: 0, duration: 0.5, ease: 'power3.out' });
-  const old = nameBox.firstElementChild;
-  if (old !== b) gsap.to(old, { yPercent: -100, duration: 0.5, ease: 'power3.out', onComplete: () => old.remove() });
+  gsap.fromTo(b, { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' });
+  if (old) { gsap.killTweensOf(old); gsap.to(old, { yPercent: -100, duration: 0.45, ease: 'power3.out', onComplete: () => old.remove() }); }
 }
 (function count() {
   shown += (target - shown) * 0.08;
