@@ -278,7 +278,7 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
       if (desk.matches) want.addScaledVector(AXIS, viewH * (W / Hh) * 0.15 / 1.6);
     } else want.copy(AXIS).multiplyScalar(scrollP * span);
     want.y = 0.9;
-    target.lerp(want, 0.08);
+    target.lerp(want, sel >= 0 || Math.abs(zoom - 1) > 0.01 ? 0.08 : 0.35);
     zoom += ((sel >= 0 ? 1.6 : 1) - zoom) * 0.08;
     cam.zoom = zoom; cam.updateProjectionMatrix();
     cam.position.copy(target).addScaledVector(DIR, 40);

@@ -10,7 +10,7 @@ const canvas = document.getElementById('hero-gl');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
@@ -171,7 +171,7 @@ function frame() {
   requestAnimationFrame(frame);
   if (!visible) return;
   const t = clock.getElapsedTime();
-  p += (pTarget - p) * (reduce ? 1 : 0.12);
+  p += (pTarget - p) * (reduce ? 1 : 0.4);
   smx += (mx - smx) * 0.05; smy += (my - smy) * 0.05;
 
   const gap = ease(range(p, GAP));

@@ -102,7 +102,7 @@ export function buildChapters(root, onPick) {
     const dist = () => Math.max(0, track.scrollWidth - innerWidth);
 
     // 1) 카테고리가 화면에 들어오는 동안 첫 그림이 움직입니다
-    const tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top 85%', end: 'top top', scrub: 0.6 } });
+    const tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top 85%', end: 'top top', scrub: true } });
     MOTIONS[sec.dataset.cat](sec.querySelector('.mv'), tl);
     tl.from(sec.querySelectorAll('.ch-text > *'), { y: 40, opacity: 0, stagger: 0.08, ease: 'power3.out' }, 0);
 
@@ -110,7 +110,7 @@ export function buildChapters(root, onPick) {
     const move = gsap.to(track, {
       x: () => -dist(),
       ease: 'none',
-      scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + dist(), pin: true, scrub: 0.8, invalidateOnRefresh: true, anticipatePin: 1 },
+      scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + dist(), pin: true, scrub: true, invalidateOnRefresh: true, anticipatePin: 1 },
     });
 
     // 3) 카드 사진이 살짝 다른 속도로 흘러 깊이감을 만듭니다

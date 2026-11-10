@@ -1,7 +1,8 @@
 // 부드러운 스크롤 · 로딩 화면 · 등장 모션
 gsap.registerPlugin(ScrollTrigger);
 
-const lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+// 휠을 한 칸 굴릴 때마다 끊어 움직이지 않고, 관성처럼 이어서 흐르게 합니다 (lerp 방식)
+const lenis = new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 0.9, touchMultiplier: 1.4 });
 window.lenis = lenis;
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
