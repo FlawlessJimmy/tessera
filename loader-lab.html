@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tessera · Loader Lab</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }</script>
+  <style>
+    :root { --ink: #efe9df; --muted: rgba(239, 233, 223, 0.5); --accent: #b4573a; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #12100d; color: var(--ink); font-family: 'Pretendard Variable', Pretendard, sans-serif; overflow: hidden; }
+    canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    .ui { position: fixed; inset: 0; pointer-events: none; display: grid; grid-template-rows: auto 1fr auto; padding: clamp(16px, 3vw, 36px); }
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; pointer-events: auto; }
+    .brand { font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: -0.03em; }
+    .brand small { font-weight: 400; color: var(--muted); margin-left: 8px; font-size: 13px; letter-spacing: 0; }
+    .tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(239, 233, 223, 0.08); backdrop-filter: blur(10px); flex-wrap: wrap; }
+    .tabs button, .replay { font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer; height: 38px; padding: 0 16px; border-radius: 999px; font-size: 13.5px; white-space: nowrap; }
+    .tabs button b { font-family: 'Inter Tight', sans-serif; color: var(--accent); margin-right: 6px; }
+    .tabs button.on { background: var(--ink); color: #12100d; }
+    .replay { border: 1px solid rgba(239, 233, 223, 0.25); }
+    .bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; transition: opacity 0.6s; }
+    .count { font-family: 'Inter Tight', sans-serif; font-weight: 500; line-height: 0.8; display: flex; align-items: flex-start; }
+    .count span { font-size: clamp(64px, 11vw, 170px); letter-spacing: -0.06em; font-variant-numeric: tabular-nums; }
+    .count i { font-style: normal; font-size: clamp(16px, 1.8vw, 26px); color: var(--muted); margin: 0.3em 0 0 0.2em; }
+    .now { text-align: right; display: grid; gap: 6px; padding-bottom: 6px; }
+    .now small { font-family: 'Inter Tight', sans-serif; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .now em { font-family: 'Instrument Serif', serif; font-size: clamp(22px, 2.4vw, 34px); }
+    .now p { font-size: 13px; color: var(--muted); max-width: 340px; margin-left: auto; }
+    .bar { position: fixed; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(239, 233, 223, 0.08); }
+    .bar i { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+    .flash { position: fixed; inset: 0; background: #f3efe8; opacity: 0; pointer-events: none; }
+    .done { position: fixed; left: 50%; bottom: 40px; translate: -50% 0; font-size: 13px; color: #2a2621; background: rgba(255, 255, 255, 0.85); padding: 8px 14px; border-radius: 999px; opacity: 0; transition: opacity 0.5s; }
+    @media (max-width: 720px) {
+      .tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+      .tabs button { padding: 0 12px; }
+      .bottom { flex-direction: column; align-items: flex-start; }
+      .now { text-align: left; } .now p { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gl"></canvas>
+  <div class="flash" id="flash"></div>
+  <div class="ui">
+    <div class="top">
+      <span class="brand">Tessera<small>Loader Lab · 로딩 시안 5종</small></span>
+      <nav class="tabs" id="tabs">
+        <button data-i="0" class="on"><b>01</b>타일 시공</button>
+        <button data-i="1"><b>02</b>조립되는 집 모형</button>
+        <button data-i="2"><b>03</b>쌓이는 샘플 칩</button>
+        <button data-i="3"><b>04</b>맞춰지는 큐브</button>
+        <button data-i="4"><b>05</b>해가 드는 빈 방</button>
+      </nav>
+      <button class="replay" id="replay">다시 보기 ↻</button>
+    </div>
+    <div></div>
+    <div class="bottom" id="bottom">
+      <div class="count"><span id="num">0</span><i>%</i></div>
+      <div class="now"><small id="label">Laying tiles</small><em id="title">Tile by tile</em><p id="desc"></p></div>
+    </div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="done" id="done">여기서 랜딩(헤링본 벽)으로 이어집니다</div>
+  <script type="module" src="js/lab.js?v=1"></script>
+</body>
+</html>
