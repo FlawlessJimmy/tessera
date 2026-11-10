@@ -1,8 +1,8 @@
 // 카테고리 화면 · 방 모형 · 스튜디오(자재를 누르면 열리는 시트) · 견적 계산
 import { MATERIALS, BY_ID, CATS, CALC, calcType, texPath, won, shopLinks, estimate, WALL_RATIO } from './data.js';
-import { createStudio } from './viewer.js';
-import { buildChapters } from './chapters.js?v=3';
-import { createRooms } from './rooms.js';
+import { createStudio } from './viewer.js?v=2';
+import { buildChapters } from './chapters.js?v=4';
+import { createRooms } from './rooms.js?v=2';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];

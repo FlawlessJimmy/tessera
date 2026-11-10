@@ -41,7 +41,7 @@ function meterBox(w, h, d) {
 }
 
 const C = {
-  cap: new THREE.MeshStandardMaterial({ color: '#f3efe9', roughness: 0.9 }),
+  cap: new THREE.MeshStandardMaterial({ color: '#f2f2f0', roughness: 0.9 }),
   fabric: new THREE.MeshStandardMaterial({ color: '#d9d1c4', roughness: 0.95 }),
   fabric2: new THREE.MeshStandardMaterial({ color: '#b9ae9c', roughness: 0.95 }),
   wood: new THREE.MeshStandardMaterial({ color: '#a77f5c', roughness: 0.6 }),

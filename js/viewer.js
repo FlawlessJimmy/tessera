@@ -64,10 +64,10 @@ export function createStudio({ canvas, stage, photo }) {
   const rScene = new THREE.Scene();
   rScene.environment = env;
   rScene.environmentIntensity = 0.32;
-  rScene.background = new THREE.Color('#e9e4dc');
+  rScene.background = new THREE.Color('#ececec');
   const rCam = new THREE.PerspectiveCamera(46, 1, 0.05, 40);
   const W = 6, Dp = 5, H = 2.5;
-  const paint = new THREE.MeshStandardMaterial({ color: '#ece8e1', roughness: 0.93 });
+  const paint = new THREE.MeshStandardMaterial({ color: '#efefed', roughness: 0.93 });
   const plain = new THREE.MeshStandardMaterial({ color: '#d8d3cb', roughness: 0.8 });
 
   const floor = new THREE.Mesh(meterUV(new THREE.PlaneGeometry(W, Dp), W, Dp), plain);

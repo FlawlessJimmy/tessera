@@ -188,7 +188,8 @@ export function buildChapters(root, onPick) {
   root.innerHTML = cats.map((key) => {
     const c = CATS[key];
     const list = MATERIALS.filter((m) => m.cat === key);
-    return `<section class="chapter ly-${LAYOUT[key]}" data-cat="${key}" id="ch-${key}">${BUILD[LAYOUT[key]](c, list, key)}</section>`;
+    const dark = key === 'paint' || key === 'panel' ? ' is-dark' : ''; // 검은 판 구간
+    return `<section class="chapter ly-${LAYOUT[key]}${dark}" data-cat="${key}" id="ch-${key}">${BUILD[LAYOUT[key]](c, list, key)}</section>`;
   }).join('');
 
   root.addEventListener('click', (e) => {
