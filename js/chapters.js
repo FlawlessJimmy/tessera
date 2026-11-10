@@ -56,7 +56,13 @@ const MOTIONS = {
 // 카테고리마다 스크롤하는 방식 자체를 다르게 둡니다.
 //  마루: 가로로 지나가는 레일 · 타일: 속도가 다른 세로 기둥 · 벽지: 한 장씩 덮이는 전체 화면
 //  도장: 왼쪽 견본이 바뀌는 좌우 분할 · 석재: 3D 회전 진열대 · 패널: 펼쳐지는 아코디언 · 벽돌: 거대한 글자 띠
-const LAYOUT = { floor: 'rail', tile: 'columns', wallpaper: 'stack', paint: 'split', stone: 'carousel', panel: 'accordion', brick: 'marquee' };
+// 보드에 깔 타일 한 장 크기(mm) · baked = 텍스처에 줄눈이 이미 그려져 있음
+const TILE = {
+  terrazzo_white: [600, 600, 0], zellige_green: [100, 100, 1], glaze_mustard: [150, 150, 1], navy_long: [65, 260, 1],
+  pink_stack: [70, 280, 1], white_wave: [130, 130, 1], sage_pattern: [200, 200, 1], stone_grey: [600, 1200, 1],
+  marble_beige: [600, 1200, 1], ribbed_red: [100, 300, 1], granite_tile: [300, 600, 0],
+};
+const LAYOUT = { floor: 'rail', tile: 'board', wallpaper: 'stack', paint: 'split', stone: 'carousel', panel: 'accordion', brick: 'marquee' };
 
 export function buildChapters(root, onPick) {
   const cats = Object.keys(CATS);
@@ -90,20 +96,23 @@ export function buildChapters(root, onPick) {
         ${list.map((m, i) => card(m, c, i)).join('')}
         <div class="ch-end" aria-hidden="true"><span>${c.no}</span></div>
       </div></div>`,
-    // 02 타일: 제목은 왼쪽에 붙어 있고, 오른쪽 세 기둥이 서로 다른 속도로 흐름
-    columns: (c, list, key) => {
-      const cols = [[], [], []];
-      list.forEach((m, i) => cols[i % 3].push(card(m, c, i)));
-      return `<div class="cl-wrap">
-        <div class="cl-side">${head(c, list)}<div class="ch-visual sm">${VISUALS[key]()}</div></div>
-        <div class="cl-cols">${cols.map((col, k) => `<div class="cl-col" data-k="${k}">${col.join('')}</div>`).join('')}</div>
-      </div>`;
-    },
-    // 03 벽지: 한 장이 화면 전체를 덮고, 다음 장이 아래에서 롤처럼 올라와 덮음
+    // 02 타일: 타일 매장 벽처럼 크기가 다른 샘플 보드 11개를 짜 맞춘 벽. 스크롤하면 타일이 한 장씩 붙음
+    board: (c, list) => `
+      <div class="bd-pin">
+        ${head(c, list, 'bd-head')}
+        <div class="bd-wall">
+          ${list.map((m, i) => `
+          <button class="bd-board" data-id="${m.id}" data-k="${i}" style="--bg:url(${D(m.id)})" aria-label="${m.ko} 자세히 보기">
+            <span class="bd-cells"></span>
+            <span class="bd-tag"><b>${m.ko}</b><span>${m.spec.split(' · ')[0]} · ${price(m)}</span></span>
+          </button>`).join('')}
+        </div>
+      </div>`,
+    // 03 벽지: 방 한쪽 벽. 걸레받이 · 바닥 · 창빛은 그대로 두고 벽지만 롤로 올라와 바뀜
     stack: (c, list) => `
       <div class="st-pin">
         ${list.map((m, i) => `
-        <div class="st-layer" style="--bg:url(${D(m.id)}); --sz:${Math.round(m.dim / 4)}px">
+        <div class="st-layer" style="--bg:url(${D(m.id)}); --sz:calc(${(m.dim / 1000).toFixed(3)} * 34vh)">
           <div class="st-roll"></div>
           ${i === 0 ? head(c, list, 'st-head') : ''}
           <button class="st-tag" data-id="${m.id}">
@@ -113,6 +122,13 @@ export function buildChapters(root, onPick) {
             <span class="st-open">자세히 보기 ↗</span>
           </button>
         </div>`).join('')}
+        <div class="st-room" aria-hidden="true">
+          <div class="st-light"></div>
+          <div class="st-art"><i></i></div>
+          <div class="st-outlet"></div>
+          <div class="st-base"></div>
+          <div class="st-floor" style="background-image:url(${D('laminate_floor_02')})"></div>
+        </div>
       </div>`,
     // 04 도장 · 미장: 왼쪽 큰 견본이 고정, 오른쪽 설명을 내릴 때마다 흙손 자국처럼 바뀜
     split: (c, list) => `
@@ -199,15 +215,60 @@ export function buildChapters(root, onPick) {
         gsap.fromTo(i, { xPercent: -6 }, { xPercent: 6, ease: 'none', scrollTrigger: { trigger: i.parentElement, containerAnimation: move, start: 'left right', end: 'right left', scrub: true } });
       });
     },
-    columns(sec) {
-      const tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top 85%', end: 'top 10%', scrub: true } });
-      MOTIONS[sec.dataset.cat](sec.querySelector('.mv'), tl);
+    board(sec) {
       intro(sec);
-      // 가운데 기둥은 거꾸로, 양쪽은 서로 다른 속도로
-      const speed = [-90, 140, -190];
-      sec.querySelectorAll('.cl-col').forEach((col, k) => {
-        gsap.fromTo(col, { y: -speed[k] / 2 }, { y: speed[k], ease: 'none', scrollTrigger: { trigger: sec, start: 'top bottom', end: 'bottom top', scrub: true } });
-      });
+      const boards = [...sec.querySelectorAll('.bd-board')];
+      let tl = null, sts = [];
+      // 보드 크기에 맞춰 실제 타일 칸을 나누고, 줄눈에 맞춰 한 장씩 배치합니다
+      function cut() {
+        const all = [];
+        boards.forEach((bd) => {
+          const m = MATERIALS.find((x) => x.id === bd.dataset.id);
+          const [tw, th, baked] = TILE[m.id];
+          const W = bd.clientWidth, H = bd.clientHeight;
+          const across = tw <= 150 ? 7 : tw <= 300 ? 5 : 2.4;
+          const s = W / across / tw; // px per mm
+          const cw = tw * s, ch = th * s, gap = baked ? 0 : 3;
+          const cols = Math.ceil(W / cw), rows = Math.ceil(H / ch);
+          const box = bd.querySelector('.bd-cells');
+          let html = '';
+          // 시공하듯 아래 왼쪽부터 한 줄씩
+          for (let r = rows - 1; r >= 0; r--) for (let k = 0; k < cols; k++) {
+            const x = k * cw, y = r * ch;
+            html += `<i style="left:${x + gap / 2}px;top:${y + gap / 2}px;width:${cw - gap}px;height:${ch - gap}px;background-size:${m.dim * s}px;background-position:${-x - gap / 2}px ${-y - gap / 2}px"></i>`;
+          }
+          box.innerHTML = html;
+          all.push([...box.children]);
+        });
+        return all;
+      }
+      function build() {
+        tl?.scrollTrigger?.kill(); tl?.kill(); sts.forEach((t) => t.kill()); sts = [];
+        gsap.set(sec.querySelector('.bd-wall'), { clearProps: 'all' });
+        const cells = cut();
+        const from = { opacity: 0, scale: 1.18, y: -10 };
+        const to = { opacity: 1, scale: 1, y: 0, ease: 'power2.out' };
+        if (innerWidth > 860) {
+          // 데스크톱: 벽 전체를 고정해 두고 보드마다 차례로 타일이 붙음
+          tl = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top top', end: () => '+=' + innerHeight * 1.8, pin: true, scrub: true, anticipatePin: 1 } });
+          cells.forEach((list, k) => {
+            tl.fromTo(list, from, { ...to, duration: 0.5, stagger: { each: 0.6 / list.length } }, k * 0.16)
+              .fromTo(boards[k].querySelector('.bd-tag'), { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25 }, k * 0.16 + 0.7);
+          });
+          tl.to({}, { duration: 0.35 });
+        } else {
+          // 휴대폰: 보드가 화면에 들어올 때마다 그 보드의 타일이 붙음
+          cells.forEach((list, k) => {
+            const t = gsap.timeline({ scrollTrigger: { trigger: boards[k], start: 'top 92%', end: 'top 45%', scrub: true } });
+            t.fromTo(list, from, { ...to, stagger: { each: 0.6 / list.length } }).fromTo(boards[k].querySelector('.bd-tag'), { opacity: 0 }, { opacity: 1 }, '-=0.2');
+            sts.push(t);
+          });
+        }
+        ScrollTrigger.refresh();
+      }
+      build();
+      let w = innerWidth, to;
+      addEventListener('resize', () => { if (Math.abs(innerWidth - w) < 40) return; w = innerWidth; clearTimeout(to); to = setTimeout(build, 300); });
     },
     stack(sec) {
       const layers = [...sec.querySelectorAll('.st-layer')];
