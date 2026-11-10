@@ -262,7 +262,7 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .foot-bottom { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 28px; font-size: 12.5px; color: rgba(239, 233, 223, 0.5); }
 
 /* ---------- CHAPTERS (카테고리별 가로 스크롤) ---------- */
-.chapter { position: relative; overflow: hidden; border-top: 1px solid var(--line); }
+.chapter { position: relative; overflow: clip; border-top: 1px solid var(--line); }
 .chapter:nth-child(even) { background: #ece6dc; }
 .ch-pin { height: 100vh; height: 100svh; display: flex; align-items: center; }
 .ch-track { display: flex; align-items: center; gap: clamp(18px, 2.4vw, 36px); padding: 0 var(--pad); will-change: transform; }
@@ -424,3 +424,129 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; }
 }
 .sheet .panel { top: 84px; }
 @media (max-width: 1080px) { .sheet .panel { top: auto; } }
+
+/* =========================================================
+   카테고리별 서로 다른 레이아웃
+   ========================================================= */
+.chapter .m-idx { font-family: var(--sans); font-size: 12px; letter-spacing: 0.12em; color: var(--muted); }
+.st-open { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--accent); }
+
+/* 02 타일 · 속도가 다른 세 기둥 */
+.ly-columns { padding: clamp(110px, 13vw, 180px) 0 clamp(80px, 10vw, 140px); }
+.cl-wrap { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.6fr); gap: clamp(28px, 4vw, 72px); padding: 0 var(--pad); align-items: start; }
+.cl-side { position: sticky; top: 14vh; }
+.ch-visual.sm { width: min(320px, 80%); max-height: none; margin-top: 40px; justify-self: start; }
+.cl-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 26px); }
+.cl-col { display: grid; gap: clamp(28px, 3vw, 52px); align-content: start; will-change: transform; }
+.cl-col[data-k="1"] { margin-top: 22vh; }
+.cl-col[data-k="2"] { margin-top: 8vh; }
+.ly-columns .m-card { width: auto; }
+.ly-columns .m-swatch { aspect-ratio: 1; }
+.ly-columns .m-info b { font-size: 17px; }
+.ly-columns .m-info em { font-size: 17px; }
+
+/* 03 벽지 · 한 장씩 덮이는 전체 화면 */
+.st-pin { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: #1b1714; }
+.st-layer { position: absolute; inset: 0; background: var(--bg) center / var(--sz) repeat; display: flex; align-items: flex-end; justify-content: flex-end;
+  padding: clamp(24px, 5vw, 72px) var(--pad); transform-origin: 50% 0; will-change: clip-path, transform; }
+.st-layer::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(20, 16, 12, 0.35)); pointer-events: none; }
+.st-roll { position: absolute; left: -1%; right: -1%; height: 46px; top: 100%; translate: 0 -50%; border-radius: 999px; z-index: 2;
+  background: linear-gradient(180deg, #bfae98, #f4ede2 40%, #d2c1ab 70%, #9d8a74); box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3); }
+.st-layer:first-child .st-roll { display: none; }
+.st-head { position: absolute; left: var(--pad); top: clamp(96px, 13vh, 140px); z-index: 3; background: rgba(243, 239, 232, 0.92); backdrop-filter: blur(12px);
+  padding: 26px 30px; border-radius: 20px; max-width: min(640px, 90vw); }
+.st-head .ch-en { font-size: clamp(44px, 6vw, 100px); margin: 10px 0 14px; }
+.st-tag { position: relative; z-index: 2; text-align: left; display: grid; gap: 3px; min-width: min(380px, 86vw); padding: 24px 28px; border-radius: 18px;
+  background: rgba(251, 249, 245, 0.94); backdrop-filter: blur(10px); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.45); transition: transform 0.4s var(--ease); }
+.st-tag:hover { transform: translateY(-4px); }
+.st-tag b { font-size: 24px; letter-spacing: -0.035em; margin-top: 4px; }
+.st-tag em { font-size: 22px; color: var(--muted); line-height: 1.2; }
+.st-tag .m-spec { margin-top: 8px; font-size: 13px; color: var(--ink-2); }
+
+/* 04 도장 · 미장 · 왼쪽 견본 고정, 오른쪽 설명 */
+.ly-split { padding: clamp(110px, 13vw, 180px) 0 clamp(60px, 8vw, 110px); }
+.sp-wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(30px, 5vw, 96px); padding: 0 var(--pad); }
+.sp-frame { position: sticky; top: 12vh; height: 76vh; border-radius: 6px; overflow: hidden; background: #cfc6b8; box-shadow: 0 50px 100px -50px rgba(40, 30, 20, 0.5); }
+.sp-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.sp-caption { position: absolute; left: 22px; bottom: 18px; z-index: 5; font-family: var(--serif); font-style: italic; font-size: 30px; color: #fff; text-shadow: 0 2px 20px rgba(0, 0, 0, 0.35); }
+.sp-head { margin: 6vh 0 12vh; }
+.sp-item { display: grid; gap: 3px; width: 100%; min-height: 64vh; align-content: center; text-align: left; border-top: 1px solid var(--line); opacity: 0.3; transition: opacity 0.6s; }
+.sp-item.is-on { opacity: 1; }
+.sp-item b { font-size: clamp(28px, 2.8vw, 44px); letter-spacing: -0.045em; margin-top: 6px; }
+.sp-item em { font-size: clamp(22px, 2vw, 30px); color: var(--muted); line-height: 1.2; }
+.sp-note { margin-top: 14px; max-width: 440px; color: var(--ink-2); font-size: 15.5px; }
+.sp-item .m-spec { margin-top: 10px; font-size: 13px; color: var(--ink-2); }
+
+/* 05 석재 · 3D 회전 진열대 */
+.ca-pin { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: radial-gradient(90% 70% at 50% 62%, #f7f2ea, #e2d9cc); }
+.ca-head { position: absolute; left: var(--pad); top: clamp(96px, 13vh, 140px); z-index: 2; }
+.ca-head .ch-en { font-size: clamp(48px, 6.4vw, 110px); }
+.ca-stage { position: absolute; inset: 0; perspective: 1600px; perspective-origin: 50% 40%; display: grid; place-items: center;
+  --W: min(500px, 38vw); --H: calc(var(--W) * 0.64); --R: calc(var(--W) * 1.9); }
+.ca-ring { position: relative; width: var(--W); height: var(--H); transform-style: preserve-3d; margin-top: 18vh; }
+.ca-slab { position: absolute; inset: 0; background-size: cover; background-position: center; border-radius: 4px; transform-style: preserve-3d;
+  transform: rotateY(calc(32deg * var(--i))) translateZ(var(--R)) rotateX(8deg); box-shadow: 0 50px 90px -40px rgba(40, 30, 20, 0.55); cursor: pointer; }
+.ca-edge { position: absolute; left: 0; right: 0; top: 100%; height: 16px; transform-origin: 50% 0; transform: rotateX(-90deg); filter: brightness(0.8); }
+.ca-info { position: absolute; right: var(--pad); bottom: clamp(28px, 7vh, 70px); width: min(440px, 84vw); height: 130px; pointer-events: none; }
+.ca-name { position: absolute; right: 0; bottom: 0; display: grid; gap: 2px; text-align: right; opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.6s var(--ease); }
+.ca-name.is-on { opacity: 1; transform: none; }
+.ca-name b { font-size: clamp(24px, 2.4vw, 34px); letter-spacing: -0.04em; }
+.ca-name em { font-size: clamp(20px, 1.8vw, 26px); color: var(--muted); }
+.ca-name .m-spec { font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+
+/* 06 우드 패널 · 펼쳐지는 아코디언 */
+.ac-pin { height: 100vh; height: 100svh; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 26px; padding: clamp(92px, 12vh, 124px) var(--pad) clamp(22px, 4vh, 44px); }
+.ac-head { display: flex; align-items: baseline; gap: 24px; flex-wrap: wrap; }
+.ac-head .ch-no { flex-basis: 100%; }
+.ac-head .ch-en { font-size: clamp(44px, 5.4vw, 92px); margin: 0; }
+.ac-head .ch-count { margin: 0; }
+.ac-row { display: flex; gap: 10px; min-height: 0; }
+.ac-panel { flex: 1 1 0; min-width: 0; min-height: 0; position: relative; overflow: hidden; border-radius: 12px; background-size: cover; background-position: center; text-align: left; }
+.ac-panel::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(15, 12, 9, 0.6)); }
+.ac-label { position: absolute; left: 26px; right: 26px; bottom: 24px; z-index: 2; display: grid; gap: 2px; color: #fff; opacity: 0; transform: translateY(20px); }
+.ac-label .m-idx { color: rgba(255, 255, 255, 0.7); }
+.ac-label b { font-size: clamp(24px, 2.4vw, 34px); letter-spacing: -0.04em; }
+.ac-label em { font-size: clamp(20px, 1.8vw, 26px); opacity: 0.85; }
+.ac-label .m-spec { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+.ac-label .st-open { color: #fff; }
+.ac-vert { position: absolute; left: 50%; top: 50%; z-index: 2; transform: translate(-50%, -50%) rotate(-90deg); white-space: nowrap;
+  font-family: var(--serif); font-style: italic; font-size: clamp(22px, 2.2vw, 34px); color: #fff; text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4); }
+
+/* 07 벽돌 · 거대한 글자 띠 */
+.ly-marquee { padding: clamp(110px, 13vw, 180px) 0 clamp(80px, 10vw, 140px); overflow: hidden; background: #1b1714 !important; color: #efe9df; border-top: 0; }
+.mq-head { padding: 0 var(--pad); }
+.ly-marquee .ch-ko { color: rgba(239, 233, 223, 0.7); }
+.ly-marquee .ch-ko b { color: #fff; }
+.mq-band { margin: clamp(40px, 6vw, 90px) 0; }
+.mq-line { white-space: nowrap; font-family: var(--sans); font-weight: 700; letter-spacing: -0.05em; line-height: 0.92; font-size: clamp(90px, 16vw, 270px);
+  color: transparent; background: var(--bg) center / 560px; -webkit-background-clip: text; background-clip: text; will-change: transform; }
+.mq-line.rev { opacity: 0.55; }
+.mq-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 32px); padding: 0 var(--pad); }
+.ly-marquee .m-card { width: auto; }
+.ly-marquee .m-swatch { aspect-ratio: 4 / 3; }
+.ly-marquee .m-info em, .ly-marquee .m-idx { color: rgba(239, 233, 223, 0.55); }
+.ly-marquee .m-spec, .ly-marquee .m-price { color: rgba(239, 233, 223, 0.75); }
+.ly-marquee .m-price strong { color: #fff; }
+
+@media (max-width: 860px) {
+  .cl-wrap { grid-template-columns: 1fr; }
+  .cl-side { position: static; }
+  .ch-visual.sm { width: 62vw; margin-top: 24px; }
+  .cl-cols { grid-template-columns: 1fr 1fr; }
+  .cl-col[data-k="1"] { margin-top: 10vh; }
+  .cl-col[data-k="2"] { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; margin-top: 0; }
+  .st-head { padding: 20px 22px; }
+  .st-tag { padding: 18px 20px; }
+  .st-tag b { font-size: 20px; } .st-tag em { font-size: 18px; }
+  .sp-wrap { display: block; }
+  .sp-left { position: sticky; top: 64px; z-index: 2; }
+  .sp-frame { position: relative; top: 0; height: 36vh; }
+  .sp-head { margin: 5vh 0 4vh; }
+  .sp-item { min-height: 48vh; }
+  .ca-stage { --W: 70vw; --R: calc(var(--W) * 1.7); }
+  .ca-ring { margin-top: 10vh; }
+  .ac-row { flex-direction: column; }
+  .ac-vert { transform: translate(-50%, -50%); }
+  .ac-label { left: 18px; bottom: 16px; }
+  .mq-cards { grid-template-columns: 1fr; }
+}
