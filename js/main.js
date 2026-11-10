@@ -10,67 +10,25 @@ lenis.stop();
 scrollTo(0, 0);
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
-// ---------- 로딩: 실제 자재 타일이 진행률만큼 한 장씩 깔립니다 ----------
-const LD = [
-  ['herringbone_parquet', 'Herringbone Oak'], ['zellige_green', 'Zellige Green'], ['calacatta', 'Calacatta White'],
-  ['navy_long', 'Navy Long Subway'], ['oak_tambour', 'Oak Tambour'], ['terrazzo_white', 'Terrazzo Bianco'],
-  ['glaze_mustard', 'Mustard Glaze'], ['clay_plaster', 'Clay Plaster'], ['sage_pattern', 'Sage Arch'],
-  ['red_brick', 'Classic Red'], ['nero_marquina', 'Nero Marquina'], ['pink_stack', 'Rose Stack'],
-  ['laminate_floor_02', 'Natural Oak'], ['arch_terracotta', 'Terracotta Arch'], ['travertine', 'Travertine'],
-  ['white_wave', 'White Wave'], ['walnut_louver', 'Walnut Louver'], ['ribbed_red', 'Terracotta Ribbed'],
-];
-const ldGrid = document.querySelector('.ld-grid');
-// 깔리는 순서는 대각선 물결
-const order = LD.map((_, i) => i).sort((a, b) => ((a % 6) + Math.floor(a / 6)) - ((b % 6) + Math.floor(b / 6)) || a - b);
-ldGrid.innerHTML = LD.map(([id]) => `<i style="background-image:url(assets/tex/${id}/thumb.jpg?v=2)"></i>`).join('');
-const tilesEl = [...ldGrid.children];
-const num = document.querySelector('.ld-num');
-const nameBox = document.querySelector('.ld-name');
-const bar = document.querySelector('.ld-bar i');
-let shown = 0, target = 0, done = false, laid = 0;
-addEventListener('tessera:progress', (e) => { target = Math.max(target, e.detail * 0.96); });
-addEventListener('tessera:ready', () => { target = 1; });
-let lastName = 0;
-function setName(t) {
-  // 너무 빨리 바뀌면 글자가 겹치니 0.14초에 한 번만 바꿉니다
-  const now = performance.now();
-  if (now - lastName < 140 && laid < LD.length - 1) return;
-  lastName = now;
-  while (nameBox.children.length > 1) nameBox.firstElementChild.remove();
-  const old = nameBox.firstElementChild;
-  const b = document.createElement('b'); b.textContent = t;
-  nameBox.appendChild(b);
-  gsap.fromTo(b, { yPercent: 100 }, { yPercent: 0, duration: 0.45, ease: 'power3.out' });
-  if (old) { gsap.killTweensOf(old); gsap.to(old, { yPercent: -100, duration: 0.45, ease: 'power3.out', onComplete: () => old.remove() }); }
+// ---------- 로딩 → 랜딩 ----------
+// 큐브 로딩(js/loader.js)이 끝나면 window.tesseraReveal()을 불러 랜딩 글자를 올립니다.
+let revealed = false;
+window.tesseraReveal = function () {
+  if (revealed) return;
+  revealed = true;
+  gsap.timeline({ onComplete: () => { document.documentElement.classList.remove('is-loading'); lenis.start(); ScrollTrigger.refresh(); } })
+    .from('.hero-title', { yPercent: 40, opacity: 0, duration: 1.2, ease: 'power4.out' }, 0.1)
+    .from('.hero-intro .eyebrow, .hero-sub, .hero-scroll', { y: 16, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.35)
+    .from('.nav, .hero-dots', { y: -20, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.3);
+};
+// 3D를 못 쓰는 환경이면 로딩을 걷고 바로 엽니다.
+function fallback() {
+  const ld = document.querySelector('.loader');
+  if (ld) gsap.to(ld, { opacity: 0, duration: 0.6, onComplete: () => ld.remove() });
+  window.tesseraReveal();
 }
-(function count() {
-  shown += (target - shown) * 0.08;
-  if (target === 1 && shown > 0.996) shown = 1;
-  num.textContent = Math.round(shown * 100);
-  bar.style.transform = `scaleX(${shown})`;
-  const n = Math.floor(shown * LD.length);
-  while (laid < n) {
-    const idx = order[laid];
-    tilesEl[idx].classList.add('on');
-    setName(LD[idx][1]);
-    laid++;
-  }
-  if (shown >= 1 && !done) { done = true; setTimeout(finish, 350); return; }
-  requestAnimationFrame(count);
-})();
-// 네트워크가 느려도 8초 뒤에는 열어 줍니다.
-setTimeout(() => { target = 1; }, 8000);
-
-function finish() {
-  const tl = gsap.timeline({ onComplete: () => { document.documentElement.classList.remove('is-loading'); lenis.start(); ScrollTrigger.refresh(); } });
-  tl.to(tilesEl, { rotateX: 90, opacity: 0, duration: 0.55, ease: 'power3.in', stagger: { each: 0.025, from: 'center', grid: [3, 6] } })
-    .to('.ld-num, .ld-pct', { yPercent: -110, duration: 0.6, ease: 'power3.in' }, 0.1)
-    .to('.ld-top, .ld-now, .ld-bar', { opacity: 0, duration: 0.4 }, 0.1)
-    .to('.loader', { clipPath: 'inset(0 0 100% 0)', duration: 1, ease: 'power4.inOut' }, '-=0.15')
-    .from('.hero-title', { yPercent: 40, opacity: 0, duration: 1.1, ease: 'power4.out' }, '-=0.5')
-    .from('.hero-intro .eyebrow, .hero-sub, .hero-scroll', { y: 16, opacity: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out' }, '-=0.8')
-    .from('.nav', { y: -20, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.9');
-}
+setTimeout(() => { if (!window.__loaderAlive) fallback(); }, 5000);
+setTimeout(() => { if (!revealed) fallback(); }, 20000);
 
 // ---------- 등장 모션 ----------
 gsap.utils.toArray('.reveal').forEach((el) => {
