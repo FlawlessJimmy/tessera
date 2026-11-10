@@ -56,6 +56,26 @@ const MOTIONS = {
 // 카테고리마다 스크롤하는 방식 자체를 다르게 둡니다.
 //  마루: 가로로 지나가는 레일 · 타일: 속도가 다른 세로 기둥 · 벽지: 한 장씩 덮이는 전체 화면
 //  도장: 왼쪽 견본이 바뀌는 좌우 분할 · 석재: 3D 회전 진열대 · 패널: 펼쳐지는 아코디언 · 벽돌: 거대한 글자 띠
+// 벽지마다 어울리는 액자 · 거울
+const ART = {
+  // 흰 실크: 얇은 검정 프레임 + 검정 아치와 주황 해 (가장 모던하게)
+  white_stucco: `<div class="st-art fr-black" style="left:57%;top:16%;width:clamp(150px,14vw,230px);aspect-ratio:3/4">
+    <svg viewBox="0 0 300 400"><rect width="300" height="400" fill="#f4f4f2"/><path d="M70 330V200a80 80 0 0 1 160 0v130z" fill="#111"/><circle cx="196" cy="142" r="46" fill="#ff5a1f"/><rect x="40" y="330" width="220" height="6" fill="#111"/></svg></div>`,
+  // 샌드 베이지: 원목 프레임 + 올리브 · 테라코타 잎 컷아웃 (가로형)
+  beige_wall_001: `<div class="st-art fr-oak" style="left:50%;top:18%;width:clamp(220px,22vw,360px);aspect-ratio:4/3">
+    <svg viewBox="0 0 400 300"><rect width="400" height="300" fill="#efe6d6"/><path d="M120 250C70 190 80 110 140 60c20 70 40 130-20 190z" fill="#6b7344"/><path d="M215 255c-50-40-60-120-10-170 40 50 60 110 10 170z" fill="#c66b45"/><path d="M300 250c-35-60-20-120 35-150 10 60 5 110-35 150z" fill="#2f3a2a"/><circle cx="300" cy="80" r="22" fill="#d9a441"/></svg></div>`,
+  // 린넨: 가는 황동 프레임 두 점 + 식물 선화
+  rough_linen: `<div class="st-pair" style="left:52%;top:18%">
+    <div class="st-art fr-brass" style="width:clamp(120px,11vw,180px);aspect-ratio:3/4"><svg viewBox="0 0 300 400"><rect width="300" height="400" fill="#f6f3ee"/><g fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"><path d="M150 340C150 250 145 170 160 70"/><path d="M152 260c-40-10-60-40-62-70 30 0 55 25 62 70zM154 200c35-12 55-40 55-70-30 5-50 30-55 70zM157 140c-30-12-45-35-45-60 25 3 42 25 45 60z"/></g></svg></div>
+    <div class="st-art fr-brass" style="width:clamp(120px,11vw,180px);aspect-ratio:3/4;margin-top:40px"><svg viewBox="0 0 300 400"><rect width="300" height="400" fill="#f6f3ee"/><g fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"><path d="M100 340c10-80 40-150 90-230"/><circle cx="196" cy="100" r="16"/><path d="M140 250c25 0 45-15 55-40M120 300c-25-5-40-25-42-50"/></g></svg></div>
+  </div>`,
+  // 세이지 스트라이프: 넓은 흰 매트 + 초록 언덕과 작은 해 (세로 줄무늬와 대비되는 둥근 선)
+  stripe_sage: `<div class="st-art fr-white" style="left:56%;top:15%;width:clamp(170px,16vw,260px);aspect-ratio:4/5">
+    <svg viewBox="0 0 320 400"><rect width="320" height="400" fill="#efece4"/><circle cx="215" cy="150" r="26" fill="#ff5a1f"/><path d="M0 300c60-70 140-90 200-60s90 40 120 30v130H0z" fill="#3f5f4c"/><path d="M0 340c80-30 180-40 320-10v70H0z" fill="#22382b"/></svg></div>`,
+  // 테라코타 아치: 액자 대신 둥근 황동 거울
+  arch_terracotta: `<div class="st-art st-mirror" style="left:56%;top:13%;width:clamp(170px,17vw,270px);aspect-ratio:1"><i></i></div>`,
+};
+
 // 보드에 깔 타일 한 장 크기(mm) · baked = 텍스처에 줄눈이 이미 그려져 있음
 const TILE = {
   terrazzo_white: [600, 600, 0], zellige_green: [100, 100, 1], glaze_mustard: [150, 150, 1], navy_long: [65, 260, 1],
@@ -114,6 +134,7 @@ export function buildChapters(root, onPick) {
         ${list.map((m, i) => `
         <div class="st-layer" style="--bg:url(${D(m.id)}); --sz:calc(${(m.dim / 1000).toFixed(3)} * 34vh)">
           <div class="st-roll"></div>
+          ${ART[m.id] || ''}
           ${i === 0 ? head(c, list, 'st-head') : ''}
           <button class="st-tag" data-id="${m.id}">
             <span class="m-idx">${c.no}.${String(i + 1).padStart(2, '0')}</span>
@@ -124,7 +145,6 @@ export function buildChapters(root, onPick) {
         </div>`).join('')}
         <div class="st-room" aria-hidden="true">
           <div class="st-light"></div>
-          <div class="st-art"><i></i></div>
           <div class="st-outlet"></div>
           <div class="st-base"></div>
           <div class="st-floor" style="background-image:url(${D('laminate_floor_02')})"></div>
