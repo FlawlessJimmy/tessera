@@ -1,7 +1,7 @@
 // 자재 상세: 스튜디오 + 판매처 비교 + 같이 쓰면 좋은 자재 + 이 자재를 쓴 방 + 같은 종류
 import { MATERIALS, BY_ID, CATS, ROOMS, texPath, won, shopLinks, roomsUsing, roomTotal } from './data.js';
 import { mountStudio } from './studio-ui.js?v=1';
-import { cardHTML } from './cards.js?v=1';
+import { cardHTML } from './cards.js?v=2';
 import { lookHTML } from './looks.js?v=1';
 
 const $ = (s) => document.querySelector(s);

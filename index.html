@@ -14,11 +14,8 @@
   <meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://flawlessjimmy.github.io/tessera/og-image.jpg?v=1" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="style.css?v=11" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="style.css?v=12" />
   <script type="importmap">{ "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
@@ -48,74 +45,95 @@
   <header class="nav"></header>
 
   <main id="top">
-    <!-- ============ HERO ============ -->
+    <!-- ============ HERO: 큰 제목 + 둥근 화면 (스크롤하면 화면 가득) ============ -->
     <section class="hero" id="hero">
-      <canvas id="hero-gl"></canvas>
-      <div class="hero-shade"></div>
-
-      <div class="hero-intro">
-        <p class="eyebrow">Tessera · Surface Studio</p>
-        <h1 class="hero-title">See the surface<br /><em>before</em> it's built.</h1>
-        <p class="hero-sub">벽지 · 타일 · 마루를 깔기 전에 먼저 보는 곳.</p>
-        <div class="hero-scroll"><span>Scroll</span><i></i></div>
+      <div class="hero-head">
+        <h1 class="hero-title">깔기 전에<br class="m-br" /> 먼저 보는 자재.</h1>
       </div>
-
-      <div class="hero-cap">
-        <div class="cap-row"><span class="cap-swap" data-cap="idx">01 / 05</span></div>
-        <div class="cap-row"><strong class="cap-swap" data-cap="ko">헤링본 오크 원목마루</strong></div>
-        <div class="cap-row"><em class="cap-swap" data-cap="en">Herringbone Oak</em></div>
-        <div class="cap-row"><span class="cap-swap cap-spec" data-cap="spec"></span></div>
-      </div>
-      <div class="hero-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></div>
-
-      <div class="hero-final">
-        <p class="eyebrow">600 × 600 × 12mm · Terrazzo Bianco</p>
-        <h2>One tile,<br /><em>every</em> detail.</h2>
-        <p class="hero-final-sub">자재 7종류, 34가지. 하나를 누르면 손에 든 것처럼 돌려 보고 내 방에 깔아 봅니다.</p>
-        <a href="materials.html" class="btn btn-light">자재 둘러보기 <span>→</span></a>
+      <div class="hero-stage">
+        <canvas id="hero-gl"></canvas>
+        <div class="hero-shade"></div>
+        <div class="hero-cap">
+          <div class="cap-row"><span class="cap-swap" data-cap="idx">01 / 05</span></div>
+          <div class="cap-row"><strong class="cap-swap" data-cap="ko">헤링본 오크 원목마루</strong></div>
+          <div class="cap-row"><span class="cap-swap cap-spec" data-cap="spec"></span></div>
+        </div>
+        <div class="hero-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+        <div class="hero-final">
+          <h2>타일 한 장의<br />모든 디테일.</h2>
+          <p class="hero-final-sub">자재 34가지를 손에 든 것처럼 돌려 보고, 내 방에 깔아 보고, 평수로 자재비를 계산합니다.</p>
+          <a href="materials.html" class="btn btn-light">자재 둘러보기 <span>→</span></a>
+        </div>
       </div>
     </section>
 
-    <!-- ============ 바로 들어가는 입구 ============ -->
-    <section class="hub" id="hub">
-      <div class="wrap">
-        <div class="hub-head">
-          <p class="eyebrow dark">Start here</p>
-          <h2 class="sec-title">바꾸고 싶은 <em>공간</em>.</h2>
-          <a class="more" href="materials.html">자재 전체 보기 →</a>
+    <div class="dark-flow">
+      <!-- ============ 한 단어만 바뀌는 큰 제목 + 검색 ============ -->
+      <section class="kw" id="kw">
+        <div class="wrap">
+          <div class="kw-row">
+            <div class="kw-text">
+              <h2 class="kw-title"><span class="kw-loop" id="kwLoop"></span> 하나로<br />달라지는 집.</h2>
+              <p class="kw-sub">벽 한 면, 바닥 한 칸만 바꿔도 같은 방이 전혀 다른 공간이 됩니다.<br />마루부터 벽돌까지 34가지 자재를 공간 · 색 · 가격으로 찾아봅니다.</p>
+            </div>
+            <div class="kw-icon" id="kwIcon" aria-hidden="true"></div>
+          </div>
+          <form class="kw-search" action="materials.html" role="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            <input type="search" name="q" placeholder="자재 이름, 색, 공간으로 검색 · 예: 화이트 타일, 욕실 바닥" aria-label="자재 검색" />
+            <button type="submit" aria-label="검색"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          </form>
         </div>
-        <div class="space-grid" id="spaceGrid"></div>
-      </div>
-    </section>
-    <section class="hub hub-cats">
-      <div class="wrap">
-        <div class="hub-head">
-          <p class="eyebrow dark">Browse by type</p>
-          <h2 class="sec-title">자재 종류로 찾기.</h2>
+      </section>
+
+      <!-- ============ 고르는 순간 깔리는 자재 ============ -->
+      <section class="pick" id="pick">
+        <div class="wrap pick-grid">
+          <div class="pick-left">
+            <h2 class="sec-h">고르는 순간<br />깔리는 자재.</h2>
+            <p class="sec-p">벽돌은 쌓이고, 벽지는 발리고, 타일은 붙습니다. 오른쪽에서 종류와 자재를 골라 보세요.</p>
+            <div class="pick-stage" id="pickStage"></div>
+          </div>
+          <ul class="pick-list" id="pickList"></ul>
         </div>
-        <div class="cat-grid" id="catGrid"></div>
-      </div>
-    </section>
-    <section class="hub hub-looks">
-      <div class="wrap">
-        <div class="hub-head">
-          <p class="eyebrow dark">Room Looks</p>
-          <h2 class="sec-title">자재로 완성한 <em>방</em>.</h2>
-          <a class="more" href="rooms.html">방 7개 모두 보기 →</a>
+      </section>
+
+      <!-- ============ 공간으로 찾기 ============ -->
+      <section class="spaces">
+        <div class="wrap">
+          <div class="sec-row">
+            <h2 class="sec-h">공간으로 찾기.</h2>
+            <a class="more" href="materials.html">자재 전체 보기 <span>→</span></a>
+          </div>
+          <div class="space-board" id="spaceMosaic"></div>
         </div>
-        <div class="look-grid" id="lookGrid"></div>
-      </div>
-    </section>
-    <section class="hub-cta">
-      <div class="wrap">
-        <div>
-          <p class="eyebrow">Studio</p>
-          <h2>내 방 사진에 바로 깔아 보기.</h2>
-          <p>사진을 올리고 네 모서리만 맞추면 원하는 자재가 그 자리에 깔립니다. 사진은 이 브라우저 밖으로 나가지 않습니다.</p>
+      </section>
+
+      <!-- ============ 자재로 완성한 방 ============ -->
+      <section class="looks-q">
+        <div class="wrap q-grid">
+          <div class="q-side">
+            <h2 class="sec-h">자재로<br />완성한 방.</h2>
+            <p class="sec-p">바닥 · 벽 · 상판을 한 방에 맞춘 조합입니다. 누르면 방 모형으로 열립니다.</p>
+            <a class="more" href="rooms.html">방 7개 모두 보기 <span>→</span></a>
+          </div>
+          <ul class="q-list" id="lookList"></ul>
         </div>
-        <a class="btn btn-dark" href="studio.html?mode=photo">사진 올려 보기 <span>→</span></a>
-      </div>
-    </section>
+      </section>
+
+      <!-- ============ 스튜디오로 ============ -->
+      <section class="cta">
+        <div class="wrap">
+          <div class="cta-card">
+            <div>
+              <h2>내 방 사진에 바로 깔아 보기.</h2>
+              <p>사진을 올리고 네 모서리만 맞추면 원하는 자재가 그 자리에 깔립니다. 사진은 이 브라우저 밖으로 나가지 않습니다.</p>
+            </div>
+            <a class="btn btn-light" href="studio.html?mode=photo">사진 올려 보기 <span>→</span></a>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
 
   <footer class="footer"></footer>
@@ -123,10 +141,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
-  <script src="js/chrome.js?v=1"></script>
-  <script src="js/main.js?v=7"></script>
+  <script src="js/chrome.js?v=2"></script>
+  <script src="js/main.js?v=8"></script>
   <script type="module" src="js/loader.js?v=2"></script>
-  <script type="module" src="js/hero.js?v=5"></script>
-  <script type="module" src="js/home.js?v=1"></script>
+  <script type="module" src="js/hero.js?v=6"></script>
+  <script type="module" src="js/home.js?v=2"></script>
 </body>
 </html>

@@ -17,13 +17,15 @@ if (isHome) {
   // ---------- 로딩 → 랜딩 ----------
   // 큐브 로딩(js/loader.js)이 끝나면 window.tesseraReveal()을 불러 랜딩 글자를 올립니다.
   let revealed = false;
+  window.__heroIntro = { v: 1 };
   window.tesseraReveal = function () {
     if (revealed) return;
     revealed = true;
+    // 로딩이 화면 가득 채운 마루 면 그대로에서 시작해, 둥근 화면으로 줄어들며 제목이 올라옵니다.
     gsap.timeline({ onComplete: () => { document.documentElement.classList.remove('is-loading'); lenis.start(); ScrollTrigger.refresh(); } })
-      .from('.hero-title', { yPercent: 40, opacity: 0, duration: 1.2, ease: 'power4.out' }, 0.1)
-      .from('.hero-intro .eyebrow, .hero-sub, .hero-scroll', { y: 16, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out' }, 0.35)
-      .from('.nav, .hero-dots', { y: -20, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.3);
+      .to(window.__heroIntro, { v: 0, duration: 1.6, ease: 'expo.inOut' }, 0.05)
+      .from('.hero-title', { yPercent: 35, opacity: 0, duration: 1.2, ease: 'power4.out' }, 0.75)
+      .from('.nav', { y: -20, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.8);
   };
 
   // 큐브 로딩은 처음 방문했을 때만. 같은 창에서 다시 오면 바로 엽니다.
@@ -44,11 +46,6 @@ if (isHome) {
   setTimeout(() => { if (!window.__loaderAlive) fallback(); }, 5000);
   setTimeout(() => { if (!revealed) fallback(); }, 20000);
 
-  // 히어로를 지나면 내비게이션을 밝은 배경용으로 바꿉니다.
-  ScrollTrigger.create({
-    trigger: '.hub', start: 'top 72px', endTrigger: '.footer', end: 'top 60px', refreshPriority: -1,
-    onToggle: (s) => document.querySelector('.nav').classList.toggle('is-light', s.isActive),
-  });
 } else {
   document.documentElement.classList.remove('is-loading');
 }

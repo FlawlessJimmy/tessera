@@ -1,4 +1,4 @@
-// 모든 페이지에 똑같이 들어가는 머리말(메뉴 · 검색) · 꼬리말 · 휴대폰 아래 탭 바
+// 모든 페이지에 똑같이 들어가는 머리말(메뉴) · 꼬리말 · 휴대폰 아래 탭 바
 (function () {
   const page = document.body.dataset.page || 'home';
   const LOGO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect class="lift" x="14.5" y="14.5" width="9" height="9" rx="1"/></svg>';
@@ -15,13 +15,8 @@
       <a href="index.html" class="logo" aria-label="Tessera 홈">${LOGO}<span>Tessera</span></a>
       <nav class="nav-links" aria-label="주요 메뉴">
         ${TABS.slice(1).map((t) => `<a href="${t.href}"${t.key === page ? ' aria-current="page"' : ''}>${t.label}</a>`).join('')}
-      </nav>
-      <form class="nav-search" action="materials.html" role="search">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
-        <input type="search" name="q" placeholder="화이트 타일, 욕실 바닥…" aria-label="자재 검색" />
-      </form>
-      <span class="nav-credit">A concept by <b>Nyeongho Sim</b></span>`;
-    if (page !== 'home') header.classList.add('is-light', 'is-solid');
+        <a href="materials.html?focus=search" class="nav-search" aria-label="자재 검색"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></a>
+      </nav>`;
   }
 
   const bar = document.createElement('nav');
@@ -34,20 +29,17 @@
   if (footer) {
     footer.innerHTML = `
     <div class="wrap">
-      <div class="foot-top">
-        <p class="foot-kicker">A concept project, designed &amp; built by</p>
-        <p class="foot-name">Nyeongho Sim<span>심녕호</span></p>
-      </div>
-      <div class="foot-cols">
-        <div><h4>About</h4><p>Tessera는 심녕호가 기획 · 디자인 · 개발까지 혼자 맡아 만든 가상의 자재 플랫폼입니다. 실제로 영업하는 회사가 아닙니다.</p></div>
-        <div><h4>Prices &amp; Links</h4><p>가격은 2026년 11월 기준 시연용 참고가입니다. 판매처 링크는 각 회사 홈페이지와 쇼핑 검색 결과로 연결되며, 실제 가격과 재고는 판매처에서 확인해야 합니다.</p></div>
-        <div><h4>Credits</h4><p>마루 · 벽 · 벽돌 · 미장 텍스처와 가구 모델 Poly Haven (CC0)<br />타일 · 대리석 · 패널 · 패턴 벽지 18종 텍스처 직접 제작<br />Three.js · GSAP · Lenis</p></div>
-        <div><h4>Nyeongho Sim</h4><p><a href="https://flawlessjimmy.github.io/hutechc-portfolio/" target="_blank" rel="noopener">Portfolio ↗</a><br /><a href="https://github.com/FlawlessJimmy" target="_blank" rel="noopener">GitHub ↗</a></p></div>
-      </div>
-      <div class="foot-mark" aria-hidden="true">Tessera</div>
+      <nav class="foot-links" aria-label="꼬리말 메뉴">
+        <a href="materials.html">자재 찾기</a><a href="rooms.html">룸</a><a href="studio.html">스튜디오</a>
+        <a href="https://flawlessjimmy.github.io/hutechc-portfolio/" target="_blank" rel="noopener">포트폴리오 ↗</a>
+        <a href="https://github.com/FlawlessJimmy" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+      <p class="foot-info">Tessera는 심녕호(Nyeongho Sim)가 기획 · 디자인 · 개발까지 혼자 맡아 만든 가상의 자재 플랫폼입니다. 실제로 영업하는 회사가 아닙니다.<br />
+      가격은 2026년 11월 기준 시연용 참고가이며, 실제 가격과 재고는 판매처에서 확인해야 합니다.<br />
+      텍스처: Poly Haven (CC0) · 타일 · 대리석 · 패널 · 패턴 벽지 18종 직접 제작 | Three.js · GSAP · Lenis</p>
       <div class="foot-bottom">
-        <span>© 2026 Nyeongho Sim. All rights reserved.</span>
-        <span>Planned, designed &amp; developed by Nyeongho Sim · 심녕호 작업물</span>
+        <span>© 2026 Nyeongho Sim</span>
+        <span class="foot-sign">Planned, designed &amp; developed by <b>Nyeongho Sim</b> · 심녕호 작업물</span>
       </div>
     </div>`;
   }

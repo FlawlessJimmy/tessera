@@ -135,13 +135,23 @@ resize();
 new ResizeObserver(resize).observe(canvas);
 
 // ---------- 화면 글자 ----------
-const intro = document.querySelector('.hero-intro');
+const head = document.querySelector('.hero-head');
+const stageEl = document.querySelector('.hero-stage');
+const nav = document.querySelector('.nav');
+// 처음에는 큰 제목 아래 둥근 화면으로 보이다가, 스크롤하면 화면 가득 펼쳐집니다.
+let insetTop = 300, insetX = 60;
+function measure() {
+  insetTop = head.offsetTop + head.offsetHeight;
+  insetX = Math.max(innerWidth < 720 ? 16 : 60, (innerWidth - 1230) / 2);
+}
+measure();
+addEventListener('resize', measure);
+document.fonts?.ready.then(measure);
 const cap = document.querySelector('.hero-cap');
 const fin = document.querySelector('.hero-final');
 const dots = [...document.querySelectorAll('.hero-dots i')];
 const capIdx = cap.querySelector('[data-cap="idx"]');
 const capKo = cap.querySelector('[data-cap="ko"]');
-const capEn = cap.querySelector('[data-cap="en"]');
 const capSpec = cap.querySelector('[data-cap="spec"]');
 let shown = -1;
 function setCaption(i) {
@@ -151,7 +161,7 @@ function setCaption(i) {
   dots.forEach((d, k) => d.classList.toggle('on', k === i));
   const apply = () => {
     capIdx.textContent = String(i + 1).padStart(2, '0') + ' / ' + String(HERO_SEQUENCE.length).padStart(2, '0');
-    capKo.textContent = m.ko; capEn.textContent = m.en; capSpec.textContent = m.spec;
+    capKo.textContent = m.ko; capSpec.textContent = m.spec;
   };
   if (window.gsap) {
     gsap.timeline()
@@ -229,9 +239,14 @@ function frame() {
   key.position.x = -2.4 + (reduce ? 0 : Math.sin(t * 0.35) * 1.2);
   key.position.y = 2.6 + (reduce ? 0 : Math.cos(t * 0.27) * 0.6);
 
-  // 글자
-  intro.style.opacity = 1 - range(p, [0.02, 0.07]);
-  intro.style.transform = `translateY(${-range(p, [0.02, 0.07]) * 40}px)`;
+  // 둥근 화면 → 화면 가득
+  const scrollOpen = ease(range(p, [0, 0.07]));
+  const o = 1 - Math.max(scrollOpen, window.__heroIntro ? window.__heroIntro.v : 0);
+  const R = 32 * o;
+  stageEl.style.clipPath = `inset(${insetTop * o}px ${insetX * o}px 0px ${insetX * o}px round ${R}px ${R}px 0px 0px)`;
+  head.style.opacity = 1 - range(p, [0, 0.05]);
+  head.style.transform = `translateY(${-range(p, [0, 0.06]) * 70}px)`;
+  nav.classList.toggle('is-dark', scrollOpen > 0.6);
   const capOn = range(p, [0.05, 0.09]) * (1 - range(p, [0.7, 0.75]));
   cap.style.opacity = capOn;
   fin.style.opacity = range(p, [0.86, 0.93]);
@@ -249,7 +264,7 @@ function bindScroll() {
   ScrollTrigger.create({
     trigger: section,
     start: 'top top',
-    end: () => '+=' + innerHeight * 6,
+    end: () => '+=' + innerHeight * 5,
     pin: true,
     scrub: true,
     refreshPriority: 1,

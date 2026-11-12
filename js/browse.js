@@ -1,7 +1,6 @@
-// 자재 찾기: 종류 탭 · 검색 · 필터(공간 · 색 · 마감 · 가격 · 판매처) · 정렬 · 카드 목록
+// 자재 찾기: 종류 · 검색 · 필터(공간 · 색 · 마감 · 가격 · 판매처) · 정렬 · 카드 목록
 import { MATERIALS, CATS, SPACES, COLORS, FINISHES, PRICE_BANDS, BRANDS, texPath, won, searchText } from './data.js';
-import { VISUALS, MOTIONS } from './chapters.js?v=6';
-import { cardHTML } from './cards.js?v=1';
+import { cardHTML } from './cards.js?v=2';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -25,7 +24,7 @@ const GROUPS = [
 const label = (g, v) => GROUPS.find((x) => x.key === g).options.find((o) => o.v === v)?.label || v;
 
 function matches(m, skip) {
-  if (state.cat !== 'all' && m.cat !== state.cat) return false;
+  if (skip !== 'cat' && state.cat !== 'all' && m.cat !== state.cat) return false;
   if (state.q) {
     const t = searchText(m);
     if (!state.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w))) return false;
@@ -48,50 +47,30 @@ function syncURL() {
   history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
 }
 
-// ---------- 종류 탭 ----------
-const tabs = $('#catTabs');
-function renderTabs() {
-  const all = [{ k: 'all', ko: '전체', n: MATERIALS.length }, ...Object.entries(CATS).map(([k, c]) => ({ k, ko: c.ko, n: MATERIALS.filter((m) => m.cat === k).length }))];
-  tabs.innerHTML = all.map((t) => `<button type="button" data-cat="${t.k}" class="${state.cat === t.k ? 'is-on' : ''}" aria-pressed="${state.cat === t.k}">${t.ko}<span>${t.n}</span></button>`).join('');
-}
-tabs.addEventListener('click', (e) => {
-  const b = e.target.closest('[data-cat]');
-  if (!b || b.dataset.cat === state.cat) return;
-  state.cat = b.dataset.cat;
-  renderTabs(); renderIntro(); update();
-});
-
-// ---------- 종류 소개 (짧은 띠 + 그 자재다운 움직임 한 번) ----------
-const intro = $('#catIntro');
-function renderIntro() {
-  if (state.cat === 'all') { intro.hidden = true; intro.innerHTML = ''; return; }
-  const c = CATS[state.cat];
-  intro.hidden = false;
-  intro.innerHTML = `
-    <div class="ci-text">
-      <span class="ch-no">${c.no} / 07</span>
-      <h2>${c.en.replace(/ & /, ' <em>&amp;</em> ')}</h2>
-      <p><b>${c.ko}</b>${c.line}</p>
-    </div>
-    <div class="ci-visual">${VISUALS[state.cat]()}</div>`;
-  const tl = gsap.timeline({ paused: true });
-  MOTIONS[state.cat](intro.querySelector('.mv'), tl);
-  tl.duration(1.4).play(0);
-  gsap.from(intro.querySelectorAll('.ci-text > *'), { y: 18, opacity: 0, stagger: 0.06, duration: 0.6, ease: 'power3.out' });
-}
-
 // ---------- 필터 ----------
 const fBody = $('#filters .filters-body');
 function renderFilters() {
-  fBody.innerHTML = GROUPS.map((g) => `
+  const cats = [['all', '전체'], ...Object.entries(CATS).map(([k, c]) => [k, c.ko])];
+  const catHTML = `
+    <fieldset class="fgroup">
+      <legend>종류</legend>
+      <div class="fopts">
+        ${cats.map(([k, ko]) => {
+          const n = MATERIALS.filter((m) => (k === 'all' || m.cat === k) && matches(m, 'cat')).length;
+          const on = state.cat === k;
+          return `<button type="button" class="fopt radio${on ? ' is-on' : ''}" data-cat="${k}" aria-pressed="${on}" ${n === 0 && !on ? 'disabled' : ''}><i class="box"></i>${ko}<span>${n}</span></button>`;
+        }).join('')}
+      </div>
+    </fieldset>`;
+  fBody.innerHTML = catHTML + GROUPS.map((g) => `
     <fieldset class="fgroup">
       <legend>${g.title}</legend>
-      <div class="fopts ${g.key === 'color' ? 'colors' : ''}">
+      <div class="fopts">
         ${g.options.map((o) => {
           const n = MATERIALS.filter((m) => matches(m, g.key) && g.test(m, o.v)).length;
           const on = state[g.key].includes(o.v);
           return `<button type="button" class="fopt${on ? ' is-on' : ''}" data-g="${g.key}" data-v="${o.v}" aria-pressed="${on}" ${n === 0 && !on ? 'disabled' : ''}>
-            ${o.dot ? `<i style="background:${o.dot}"></i>` : ''}${o.label}<span>${n}</span></button>`;
+            <i class="box"></i>${o.dot ? `<i class="dot" style="background:${o.dot}"></i>` : ''}${o.label}<span>${n}</span></button>`;
         }).join('')}
       </div>
     </fieldset>`).join('');
@@ -99,6 +78,7 @@ function renderFilters() {
 fBody.addEventListener('click', (e) => {
   const b = e.target.closest('.fopt');
   if (!b) return;
+  if (b.dataset.cat) { state.cat = b.dataset.cat; update(); return; }
   const arr = state[b.dataset.g], v = b.dataset.v;
   const i = arr.indexOf(v);
   i >= 0 ? arr.splice(i, 1) : arr.push(v);
@@ -106,7 +86,7 @@ fBody.addEventListener('click', (e) => {
 });
 function resetAll() { GROUPS.forEach((g) => { state[g.key] = []; }); state.q = ''; $('#q').value = ''; update(); }
 $('#resetFilters').addEventListener('click', resetAll);
-$('#emptyReset').addEventListener('click', () => { state.cat = 'all'; renderTabs(); renderIntro(); resetAll(); });
+$('#emptyReset').addEventListener('click', () => { state.cat = 'all'; resetAll(); });
 
 // 휴대폰: 필터를 아래에서 올라오는 창으로
 const filtersEl = $('#filters');
@@ -120,15 +100,18 @@ $('#applyFilters').addEventListener('click', closeF);
 const chips = $('#activeChips');
 function renderChips() {
   const list = [];
+  if (state.cat !== 'all') list.push({ g: 'cat', v: state.cat, l: CATS[state.cat].ko });
   if (state.q) list.push({ g: 'q', v: state.q, l: `“${state.q}”` });
   GROUPS.forEach((g) => state[g.key].forEach((v) => list.push({ g: g.key, v, l: label(g.key, v) })));
   chips.innerHTML = list.map((c) => `<button type="button" class="chip" data-g="${c.g}" data-v="${c.v}">${c.l}<span aria-hidden="true">×</span></button>`).join('');
   $('#openFilters').dataset.n = list.filter((c) => c.g !== 'q').length || '';
+  chips.hidden = !list.length;
 }
 chips.addEventListener('click', (e) => {
   const b = e.target.closest('.chip');
   if (!b) return;
-  if (b.dataset.g === 'q') { state.q = ''; $('#q').value = ''; } else state[b.dataset.g] = state[b.dataset.g].filter((v) => v !== b.dataset.v);
+  if (b.dataset.g === 'cat') state.cat = 'all';
+  else if (b.dataset.g === 'q') { state.q = ''; $('#q').value = ''; } else state[b.dataset.g] = state[b.dataset.g].filter((v) => v !== b.dataset.v);
   update();
 });
 
@@ -154,6 +137,5 @@ function update() {
   ScrollTrigger.refresh();
 }
 
-renderTabs();
-renderIntro();
 update();
+if (params.get('focus') === 'search') qInput.focus();

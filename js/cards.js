@@ -12,7 +12,6 @@ export function cardHTML(m) {
       <span class="mcard-body">
         <span class="mcard-cat">${CATS[m.cat].ko} · ${m.spaces.slice(0, 2).join(' · ')}</span>
         <b class="mcard-name">${m.ko}</b>
-        <span class="mcard-en">${m.en}</span>
         <span class="mcard-price"><strong>${won(m.perSqm)}원</strong> / ㎡</span>
       </span>
     </a>
