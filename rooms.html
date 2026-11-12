@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Room Looks · Tessera</title>
+  <meta name="description" content="자재로 완성한 방 7개. 방을 누르면 쓴 자재와 자재비가 나옵니다." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Tessera" />
+  <meta property="og:title" content="Room Looks · Tessera" />
+  <meta property="og:description" content="자재로 완성한 방 7개. 방을 누르면 쓴 자재와 자재비가 나옵니다." />
+  <meta property="og:image" content="https://flawlessjimmy.github.io/tessera/og-image.jpg?v=1" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="style.css?v=11" />
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }</script>
+</head>
+<body data-page="rooms" class="sub">
+  <header class="nav"></header>
+
+  <main class="page rooms-page">
+    <section class="rooms" id="rooms">
+      <div class="rooms-head">
+        <p class="crumb"><a href="index.html">홈</a><span>/</span>룸</p>
+        <h1 class="sec-title">자재로 완성한 방 <em>7</em>개.</h1>
+      </div>
+      <canvas id="rooms-gl"></canvas>
+      <div class="room-labels" id="roomLabels"></div>
+      <aside class="room-panel" id="roomPanel" aria-live="polite">
+        <button class="rp-close" aria-label="닫기">×</button>
+        <div class="rp-body"></div>
+      </aside>
+      <p class="rooms-hint">스크롤하면 옆방으로 넘어가고, 방을 누르면 쓴 자재가 나옵니다</p>
+    </section>
+  </main>
+  <footer class="footer"></footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script src="js/chrome.js?v=1"></script>
+  <script src="js/main.js?v=7"></script>
+  <script type="module" src="js/rooms-page.js?v=1"></script>
+</body>
+</html>

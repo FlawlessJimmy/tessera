@@ -212,3 +212,72 @@ export function estimate(m, v) {
   const total = qty * m.price;
   return { area, need, qty, total, perSqm: m.price / m.unitArea, perPyeong: (m.price / m.unitArea) * PYEONG };
 }
+
+// ---------- 방 조합 (Room Looks) ----------
+export const ROOMS = [
+  { id: 'nordic', ko: '노르딕 거실', en: 'Nordic Living', line: '밝은 오크 바닥에 흰 벽, 템바보드 한 면으로 결을 더했습니다.',
+    floor: 'laminate_floor_02', left: 'white_stucco', back: 'white_planks_clean', props: 'living' },
+  { id: 'japandi', ko: '재팬디 침실', en: 'Japandi Bedroom', line: '넓은 원목 바닥과 석회 미장, 월넛 루버 헤드월로 차분하게 맞췄습니다.',
+    floor: 'oak_wood_planks', left: 'plastered_wall', back: 'walnut_louver', props: 'bed' },
+  { id: 'kitchen', ko: '테라조 키친', en: 'Terrazzo Kitchen', line: '테라조 바닥과 젤리주 그린 벽, 칼라카타 상판으로 밝고 선명하게 만들었습니다.',
+    floor: 'terrazzo_white', left: 'white_stucco', back: 'zellige_green', counter: 'calacatta', props: 'kitchen' },
+  { id: 'bath', ko: '네이비 욕실', en: 'Navy Bath', line: '네이비 롱타일 벽에 화이트 웨이브를 더하고, 바닥은 큰 판 그레이로 넓혔습니다.',
+    floor: 'stone_grey', left: 'white_wave', back: 'navy_long', counter: 'quartz_grey', props: 'bath' },
+  { id: 'atelier', ko: '웜 아틀리에', en: 'Warm Atelier', line: '헤링본 바닥과 황토 미장, 오크 템바보드로 따뜻한 작업실을 만들었습니다.',
+    floor: 'herringbone_parquet', left: 'clay_plaster', back: 'oak_tambour', props: 'desk' },
+  { id: 'loft', ko: '브릭 로프트', en: 'Brick Loft', line: '화이트워시 벽돌과 마이크로시멘트, 검은 대리석 테이블로 대비를 줬습니다.',
+    floor: 'wood_floor', left: 'grey_plaster', back: 'whitewashed_brick', counter: 'nero_marquina', props: 'loft' },
+  { id: 'powder', ko: '아치 파우더룸', en: 'Arch Powder Room', line: '아치 벽지와 로즈 핑크 타일, 트래버틴 세면대로 작은 방에 포인트를 모았습니다.',
+    floor: 'sage_pattern', left: 'arch_terracotta', back: 'pink_stack', counter: 'travertine', props: 'vanity' },
+];
+
+// ---------- 찾기 · 고르기용 정보 ----------
+export const SPACES = ['거실', '침실', '주방', '욕실', '현관', '발코니'];
+export const COLORS = {
+  화이트: '#f2f1ec', 베이지: '#d8c6a8', 그레이: '#9c9c98', 블랙: '#1d1d1d', 우드: '#a8784f', 브라운: '#6b4a35',
+  그린: '#3f6e52', 블루: '#2a4466', 핑크: '#e5a5b1', 레드: '#b4462f', 옐로: '#d9a52a',
+};
+export const FINISHES = ['유광', '무광', '질감'];
+export const PRICE_BANDS = [
+  { key: 'p1', label: '㎡당 3만원 미만', min: 0, max: 30000 },
+  { key: 'p2', label: '3만 ~ 6만원', min: 30000, max: 60000 },
+  { key: 'p3', label: '6만 ~ 10만원', min: 60000, max: 100000 },
+  { key: 'p4', label: '10만원 이상', min: 100000, max: Infinity },
+];
+// [공간들, 색, 마감, 인기 순위(작을수록 인기), 신상 여부]
+const META = {
+  herringbone_parquet: [['거실', '침실'], '우드', '무광', 2], laminate_floor_02: [['거실', '침실'], '우드', '무광', 1],
+  oak_wood_planks: [['거실', '침실'], '우드', '무광', 6], wood_floor: [['거실', '침실'], '우드', '무광', 9],
+  terrazzo_white: [['욕실', '주방', '거실', '현관'], '화이트', '무광', 3, 1], zellige_green: [['주방', '욕실'], '그린', '유광', 4, 1],
+  glaze_mustard: [['주방', '욕실'], '옐로', '유광', 20, 1], navy_long: [['욕실', '주방'], '블루', '유광', 11, 1],
+  pink_stack: [['욕실'], '핑크', '유광', 16, 1], white_wave: [['욕실', '주방'], '화이트', '유광', 7, 1],
+  sage_pattern: [['욕실', '현관', '주방'], '그린', '무광', 14, 1], stone_grey: [['거실', '욕실', '현관'], '그레이', '무광', 5, 1],
+  marble_beige: [['거실', '현관'], '베이지', '유광', 8, 1], ribbed_red: [['주방', '현관'], '레드', '유광', 22, 1],
+  granite_tile: [['현관', '욕실', '발코니'], '블랙', '질감', 18],
+  white_stucco: [['거실', '침실'], '화이트', '무광', 10], beige_wall_001: [['거실', '침실'], '베이지', '무광', 12],
+  rough_linen: [['침실'], '베이지', '질감', 15], stripe_sage: [['침실', '거실'], '그린', '무광', 24, 1],
+  arch_terracotta: [['침실', '욕실'], '레드', '무광', 26, 1],
+  plastered_wall: [['거실', '침실'], '베이지', '질감', 13], grey_plaster: [['욕실', '거실', '주방'], '그레이', '질감', 17, 1],
+  clay_plaster: [['침실', '거실'], '브라운', '질감', 23, 1], concrete_wall_008: [['거실'], '그레이', '질감', 25],
+  calacatta: [['주방', '욕실'], '화이트', '유광', 19, 1], nero_marquina: [['욕실', '주방'], '블랙', '유광', 28, 1],
+  quartz_grey: [['주방'], '그레이', '무광', 21, 1], travertine: [['욕실', '거실'], '베이지', '무광', 27, 1],
+  white_planks_clean: [['거실'], '베이지', '무광', 29], oak_tambour: [['거실', '침실'], '우드', '무광', 30, 1],
+  walnut_louver: [['거실', '침실'], '우드', '무광', 31, 1],
+  red_brick: [['거실', '발코니'], '레드', '질감', 32], whitewashed_brick: [['거실', '주방'], '화이트', '질감', 33],
+  brick_wall_001: [['거실', '발코니'], '브라운', '질감', 34],
+};
+MATERIALS.forEach((m) => {
+  const [spaces, color, finish, rank, isNew] = META[m.id];
+  Object.assign(m, { spaces, color, finish, rank, isNew: !!isNew, perSqm: m.price / m.unitArea, surface: isWallish(m) ? '벽' : '바닥' });
+});
+// 검색어 한 줄 (이름 · 영문 · 종류 · 공간 · 색 · 마감 · 바닥/벽)
+export const searchText = (m) => [m.ko, m.en, CATS[m.cat].ko, m.spaces.join(' '), m.color, m.finish, m.surface, m.note].join(' ').toLowerCase();
+export const roomsUsing = (id) => ROOMS.filter((r) => ['floor', 'left', 'back', 'counter'].some((k) => r[k] === id));
+export const roomTotal = (r) => {
+  const S = 4, H = 2.7;
+  return ['floor', 'left', 'back', 'counter'].filter((k) => r[k]).reduce((sum, k) => {
+    const m = BY_ID[r[k]];
+    const area = k === 'floor' ? S * S : k === 'counter' ? 3 : S * H;
+    return sum + Math.ceil((area * (1 + m.loss)) / m.unitArea) * m.price;
+  }, 0);
+};

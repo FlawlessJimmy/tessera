@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자재 상세 · Tessera</title>
+  <meta name="description" content="자재를 돌려 보고, 방과 내 사진에 깔아 보고, 평수로 자재비를 계산합니다." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Tessera" />
+  <meta property="og:title" content="자재 상세 · Tessera" />
+  <meta property="og:description" content="자재를 돌려 보고, 방과 내 사진에 깔아 보고, 평수로 자재비를 계산합니다." />
+  <meta property="og:image" content="https://flawlessjimmy.github.io/tessera/og-image.jpg?v=1" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="style.css?v=11" />
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }</script>
+</head>
+<body data-page="materials" class="sub">
+  <header class="nav"></header>
+
+  <main class="page">
+    <div class="wrap">
+      <p class="crumb" id="crumb"><a href="index.html">홈</a><span>/</span><a href="materials.html">자재</a></p>
+      <section class="detail-studio" id="studio"></section>
+      <section class="block" id="shops">
+        <div class="block-head"><h2>판매처 비교.</h2><p>제조 · 유통사 홈페이지와 쇼핑 검색 결과로 바로 연결합니다. 가격은 2026년 11월 기준 참고가입니다.</p></div>
+        <div class="shop-table" id="shopTable"></div>
+      </section>
+      <section class="block" id="pairs">
+        <div class="block-head"><h2>같이 쓰면 좋은 자재.</h2><p>같은 공간에 잘 어울리는 바닥 · 벽 · 상판 조합입니다.</p></div>
+        <ul class="mgrid small" id="pairGrid"></ul>
+      </section>
+      <section class="block" id="looks" hidden>
+        <div class="block-head"><h2>이 자재를 쓴 방.</h2><p>Room Looks에서 실제로 깔아 본 조합입니다.</p></div>
+        <div class="look-grid" id="lookGrid"></div>
+      </section>
+      <section class="block" id="same">
+        <div class="block-head"><h2 id="sameTitle">같은 종류 다른 자재.</h2></div>
+        <ul class="mgrid small" id="sameGrid"></ul>
+      </section>
+    </div>
+  </main>
+  <footer class="footer"></footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script src="js/chrome.js?v=1"></script>
+  <script src="js/main.js?v=7"></script>
+  <script type="module" src="js/detail.js?v=1"></script>
+</body>
+</html>

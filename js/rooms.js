@@ -3,25 +3,10 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { BY_ID, CATS, texPath, won } from './data.js';
+import { BY_ID, CATS, texPath, won, ROOMS } from './data.js';
 import { getMaterial } from './materials.js';
 
-export const ROOMS = [
-  { id: 'nordic', ko: '노르딕 거실', en: 'Nordic Living', line: '밝은 오크 바닥에 흰 벽, 템바보드 한 면으로 결을 더했습니다.',
-    floor: 'laminate_floor_02', left: 'white_stucco', back: 'white_planks_clean', props: 'living' },
-  { id: 'japandi', ko: '재팬디 침실', en: 'Japandi Bedroom', line: '넓은 원목 바닥과 석회 미장, 월넛 루버 헤드월로 차분하게 맞췄습니다.',
-    floor: 'oak_wood_planks', left: 'plastered_wall', back: 'walnut_louver', props: 'bed' },
-  { id: 'kitchen', ko: '테라조 키친', en: 'Terrazzo Kitchen', line: '테라조 바닥과 젤리주 그린 벽, 칼라카타 상판으로 밝고 선명하게 만들었습니다.',
-    floor: 'terrazzo_white', left: 'white_stucco', back: 'zellige_green', counter: 'calacatta', props: 'kitchen' },
-  { id: 'bath', ko: '네이비 욕실', en: 'Navy Bath', line: '네이비 롱타일 벽에 화이트 웨이브를 더하고, 바닥은 큰 판 그레이로 넓혔습니다.',
-    floor: 'stone_grey', left: 'white_wave', back: 'navy_long', counter: 'quartz_grey', props: 'bath' },
-  { id: 'atelier', ko: '웜 아틀리에', en: 'Warm Atelier', line: '헤링본 바닥과 황토 미장, 오크 템바보드로 따뜻한 작업실을 만들었습니다.',
-    floor: 'herringbone_parquet', left: 'clay_plaster', back: 'oak_tambour', props: 'desk' },
-  { id: 'loft', ko: '브릭 로프트', en: 'Brick Loft', line: '화이트워시 벽돌과 마이크로시멘트, 검은 대리석 테이블로 대비를 줬습니다.',
-    floor: 'wood_floor', left: 'grey_plaster', back: 'whitewashed_brick', counter: 'nero_marquina', props: 'loft' },
-  { id: 'powder', ko: '아치 파우더룸', en: 'Arch Powder Room', line: '아치 벽지와 로즈 핑크 타일, 트래버틴 세면대로 작은 방에 포인트를 모았습니다.',
-    floor: 'sage_pattern', left: 'arch_terracotta', back: 'pink_stack', counter: 'travertine', props: 'vanity' },
-];
+export { ROOMS };
 
 const S = 4, H = 2.7, WT = 0.14, FT = 0.2, GAP = 7.2;
 const ROLE = { floor: '바닥', left: '왼쪽 벽', back: '정면 벽', counter: '상판' };
@@ -252,7 +237,7 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
           <strong>${won(c.total)}원</strong></button></li>`;
       }).join('')}</ul>
       <div class="rp-total"><span>이 방 자재비 (4m × 4m 기준)</span><strong>${won(sum)}원</strong></div>
-      <p class="rp-note">자재를 누르면 스튜디오에서 돌려 보고 내 방에 깔아 볼 수 있습니다. 시공비는 별도입니다.</p>`;
+      <p class="rp-note">자재를 누르면 자세히 보기로 넘어가 돌려 보고, 내 방에 깔아 보고, 판매처까지 비교할 수 있습니다. 시공비는 별도입니다.</p>`;
   }
   panel.addEventListener('click', (e) => { const b = e.target.closest('[data-id]'); if (b) onPick(b.dataset.id); });
 
@@ -297,4 +282,5 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
     });
     renderer.render(scene, cam);
   })();
+  return { select, count: ROOMS.length };
 }

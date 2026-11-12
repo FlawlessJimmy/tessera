@@ -18,13 +18,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="style.css?v=10" />
+  <link rel="stylesheet" href="style.css?v=11" />
   <script type="importmap">{ "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
   } }</script>
 </head>
-<body>
+<body data-page="home" class="is-home">
+
 
   <!-- 로딩 -->
   <div class="loader" aria-hidden="true">
@@ -43,18 +44,8 @@
     <div class="ld-bar"><i></i></div>
   </div>
 
-  <header class="nav">
-    <a href="#top" class="logo" aria-label="Tessera 처음으로">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect class="lift" x="14.5" y="14.5" width="9" height="9" rx="1"/></svg>
-      <span>Tessera</span>
-    </a>
-    <nav class="nav-links">
-      <a href="#materials">Materials</a>
-      <a href="#rooms">Rooms</a>
-      <button type="button" data-open-sheet>Studio</button>
-    </nav>
-    <span class="nav-credit">A concept by <b>Nyeongho Sim</b></span>
-  </header>
+
+  <header class="nav"></header>
 
   <main id="top">
     <!-- ============ HERO ============ -->
@@ -81,160 +72,61 @@
         <p class="eyebrow">600 × 600 × 12mm · Terrazzo Bianco</p>
         <h2>One tile,<br /><em>every</em> detail.</h2>
         <p class="hero-final-sub">자재 7종류, 34가지. 하나를 누르면 손에 든 것처럼 돌려 보고 내 방에 깔아 봅니다.</p>
-        <a href="#materials" class="btn btn-light">자재 둘러보기 <span>↓</span></a>
+        <a href="materials.html" class="btn btn-light">자재 둘러보기 <span>→</span></a>
       </div>
     </section>
 
-    <!-- ============ MATERIALS: 카테고리별 가로 스크롤 ============ -->
-    <div class="chapters" id="materials"></div>
-
-    <!-- ============ ROOM LOOKS ============ -->
-    <section class="rooms" id="rooms">
-      <div class="rooms-head">
-        <p class="eyebrow dark">Room Looks</p>
-        <h2 class="sec-title">자재로 완성한 방 <em>7</em>개.</h2>
+    <!-- ============ 바로 들어가는 입구 ============ -->
+    <section class="hub" id="hub">
+      <div class="wrap">
+        <div class="hub-head">
+          <p class="eyebrow dark">Start here</p>
+          <h2 class="sec-title">바꾸고 싶은 <em>공간</em>.</h2>
+          <a class="more" href="materials.html">자재 전체 보기 →</a>
+        </div>
+        <div class="space-grid" id="spaceGrid"></div>
       </div>
-      <canvas id="rooms-gl"></canvas>
-      <div class="room-labels" id="roomLabels"></div>
-      <aside class="room-panel" id="roomPanel" aria-live="polite">
-        <button class="rp-close" aria-label="닫기">×</button>
-        <div class="rp-body"></div>
-      </aside>
-      <p class="rooms-hint">방을 누르면 쓴 자재가 나옵니다</p>
+    </section>
+    <section class="hub hub-cats">
+      <div class="wrap">
+        <div class="hub-head">
+          <p class="eyebrow dark">Browse by type</p>
+          <h2 class="sec-title">자재 종류로 찾기.</h2>
+        </div>
+        <div class="cat-grid" id="catGrid"></div>
+      </div>
+    </section>
+    <section class="hub hub-looks">
+      <div class="wrap">
+        <div class="hub-head">
+          <p class="eyebrow dark">Room Looks</p>
+          <h2 class="sec-title">자재로 완성한 <em>방</em>.</h2>
+          <a class="more" href="rooms.html">방 7개 모두 보기 →</a>
+        </div>
+        <div class="look-grid" id="lookGrid"></div>
+      </div>
+    </section>
+    <section class="hub-cta">
+      <div class="wrap">
+        <div>
+          <p class="eyebrow">Studio</p>
+          <h2>내 방 사진에 바로 깔아 보기.</h2>
+          <p>사진을 올리고 네 모서리만 맞추면 원하는 자재가 그 자리에 깔립니다. 사진은 이 브라우저 밖으로 나가지 않습니다.</p>
+        </div>
+        <a class="btn btn-dark" href="studio.html?mode=photo">사진 올려 보기 <span>→</span></a>
+      </div>
     </section>
   </main>
 
-
-  <!-- ============ STUDIO SHEET (자재를 누르면 열림) ============ -->
-  <div class="sheet" id="sheet" aria-hidden="true" role="dialog" aria-label="자재 스튜디오">
-    <div class="sheet-inner" data-lenis-prevent>
-      <div class="sheet-head">
-        <a class="logo" aria-hidden="true" tabindex="-1"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect class="lift" x="14.5" y="14.5" width="9" height="9" rx="1"/></svg><span>Studio</span></a>
-        <div class="mode-tabs" role="tablist">
-            <button class="is-on" data-mode="sample" role="tab">돌려 보기</button>
-            <button data-mode="room" role="tab">방에 깔아 보기</button>
-            <button data-mode="photo" role="tab">내 사진에 깔아 보기</button>
-        </div>
-        <button class="sheet-close" data-close-sheet aria-label="스튜디오 닫기">닫기 <span>×</span></button>
-      </div>
-      <div class="studio" id="studio">
-        <div class="studio-grid">
-          <div class="studio-view">
-            <div class="stage" id="stage" data-mode="sample">
-              <canvas id="studio-gl"></canvas>
-
-              <div class="photo" id="photo">
-                <div class="photo-stage">
-                  <img class="photo-img" alt="자재를 깔아 볼 공간 사진" />
-                  <div class="photo-warp"></div>
-                  <svg class="photo-outline" preserveAspectRatio="none"><polygon /></svg>
-                  <button class="photo-handle" aria-label="왼쪽 위 모서리"></button>
-                  <button class="photo-handle" aria-label="오른쪽 위 모서리"></button>
-                  <button class="photo-handle" aria-label="오른쪽 아래 모서리"></button>
-                  <button class="photo-handle" aria-label="왼쪽 아래 모서리"></button>
-                </div>
-              </div>
-
-              <div class="stage-hint" data-for="sample">끌어서 돌려 보세요</div>
-              <div class="stage-hint" data-for="room">마우스를 좌우로 움직이면 방이 돌아갑니다</div>
-              <div class="surface-tabs" data-for="room">
-                <button data-surface="floor" class="is-on">바닥에</button>
-                <button data-surface="wall">벽에</button>
-              </div>
-              <div class="photo-tools" data-for="photo">
-                <label class="btn btn-small">
-                  <input type="file" accept="image/*" id="photoFile" hidden />내 사진 올리기
-                </label>
-                <button class="btn btn-small btn-ghost" id="photoReset">예시 사진</button>
-                <label class="photo-scale">무늬 크기 <input type="range" id="photoScale" min="0.4" max="2.5" step="0.05" value="1" /></label>
-              </div>
-              <div class="stage-hint photo-hint" data-for="photo">네 모서리 점을 끌어 깔 곳에 맞춰 주세요 · 사진은 이 브라우저 밖으로 나가지 않습니다</div>
-            </div>
-
-            <div class="rail" id="rail" aria-label="자재 빠르게 바꾸기"></div>
-          </div>
-
-          <aside class="panel" id="panel">
-            <p class="panel-cat" data-f="cat"></p>
-            <h3 class="panel-name" data-f="ko"></h3>
-            <p class="panel-en" data-f="en"></p>
-            <p class="panel-note" data-f="note"></p>
-
-            <dl class="spec">
-              <div><dt>규격</dt><dd data-f="spec"></dd></div>
-              <div><dt>판매 단위</dt><dd data-f="unit"></dd></div>
-              <div><dt>참고가</dt><dd data-f="price"></dd></div>
-              <div><dt>평당 자재비</dt><dd data-f="pp"></dd></div>
-            </dl>
-
-            <div class="calc">
-              <div class="calc-head">
-                <label for="pyeong" data-f="calcLabel">바닥 면적</label>
-                <div class="stepper">
-                  <button type="button" data-step="-1" aria-label="줄이기">−</button>
-                  <input id="pyeong" type="number" inputmode="decimal" min="1" max="200" value="24" />
-                  <span data-f="calcUnit">평</span>
-                  <button type="button" data-step="1" aria-label="늘리기">+</button>
-                </div>
-              </div>
-              <input type="range" id="pyeongRange" min="1" max="60" step="1" value="24" aria-label="면적" />
-              <ul class="calc-out">
-                <li><span>시공 면적</span><b data-f="area"></b></li>
-                <li><span>필요 수량</span><b data-f="qty"></b></li>
-              </ul>
-              <div class="calc-total"><span>예상 자재비</span><strong data-f="total"></strong></div>
-              <p class="calc-note" data-f="calcNote"></p>
-            </div>
-
-            <div class="shops">
-              <p class="shops-title">어디서 사나요</p>
-              <ul data-f="shops"></ul>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ FOOTER ============ -->
-  <footer class="footer">
-    <div class="wrap">
-      <div class="foot-top">
-        <p class="foot-kicker">A concept project, designed &amp; built by</p>
-        <p class="foot-name">Nyeongho Sim<span>심녕호</span></p>
-      </div>
-      <div class="foot-cols">
-        <div>
-          <h4>About</h4>
-          <p>Tessera는 심녕호가 기획 · 디자인 · 개발까지 혼자 맡아 만든 가상의 자재 브랜드입니다. 실제로 영업하는 회사가 아닙니다.</p>
-        </div>
-        <div>
-          <h4>Prices &amp; Links</h4>
-          <p>가격은 시연용 참고가입니다. 판매처 링크는 각 회사 홈페이지와 쇼핑 검색 결과로 연결되며, 실제 가격과 재고는 판매처에서 확인해야 합니다.</p>
-        </div>
-        <div>
-          <h4>Credits</h4>
-          <p>마루 · 벽 · 벽돌 · 미장 텍스처와 가구 모델 Poly Haven (CC0)<br />타일 · 대리석 · 패널 · 패턴 벽지 18종 텍스처 직접 제작<br />Three.js · GSAP · Lenis</p>
-        </div>
-        <div>
-          <h4>Nyeongho Sim</h4>
-          <p><a href="https://flawlessjimmy.github.io/hutechc-portfolio/" target="_blank" rel="noopener">Portfolio ↗</a><br /><a href="https://github.com/FlawlessJimmy" target="_blank" rel="noopener">GitHub ↗</a></p>
-        </div>
-      </div>
-      <div class="foot-mark" aria-hidden="true">Tessera</div>
-      <div class="foot-bottom">
-        <span>© 2026 Nyeongho Sim. All rights reserved.</span>
-        <span>Planned, designed &amp; developed by Nyeongho Sim · 심녕호 작업물</span>
-      </div>
-    </div>
-  </footer>
+  <footer class="footer"></footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
-  <script src="js/main.js?v=5"></script>
-  <script type="module" src="js/loader.js?v=1"></script>
-  <script type="module" src="js/hero.js?v=4"></script>
-  <script type="module" src="js/app.js?v=7"></script>
+  <script src="js/chrome.js?v=1"></script>
+  <script src="js/main.js?v=7"></script>
+  <script type="module" src="js/loader.js?v=2"></script>
+  <script type="module" src="js/hero.js?v=5"></script>
+  <script type="module" src="js/home.js?v=1"></script>
 </body>
 </html>

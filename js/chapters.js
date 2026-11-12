@@ -8,7 +8,7 @@ const D = (id) => texPath(id, 'diff');
 const rand = (a, b) => a + Math.random() * (b - a);
 
 // ---------- 카테고리마다 다른 첫 화면 그림 ----------
-const VISUALS = {
+export const VISUALS = {
   floor: () => `<div class="mv mv-floor">${Array.from({ length: 7 }, (_, i) =>
     `<i style="background-image:url(${D(['laminate_floor_02', 'herringbone_parquet', 'oak_wood_planks', 'wood_floor'][i % 4])});background-position:${rand(0, 100)}% ${i * 14}%"></i>`).join('')}</div>`,
   tile: () => {
@@ -37,7 +37,7 @@ const VISUALS = {
 };
 
 // 첫 화면 그림이 스크롤에 맞춰 움직이는 방법
-const MOTIONS = {
+export const MOTIONS = {
   floor: (v, tl) => tl.from(v.querySelectorAll('i'), { xPercent: 120, stagger: 0.08, ease: 'power3.out' }),
   tile: (v, tl) => tl.from(v.querySelectorAll('b'), { rotateY: -180, stagger: { each: 0.04, from: 'start', grid: [4, 4] }, ease: 'power2.inOut' }),
   wallpaper: (v, tl) => tl.fromTo(v.querySelector('.paper'), { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', ease: 'none' })

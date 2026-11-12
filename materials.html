@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자재 · Tessera</title>
+  <meta name="description" content="마루 · 타일 · 벽지 · 도장 · 석재 · 패널 · 벽돌 34종을 공간 · 색 · 마감 · 가격으로 찾아봅니다." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Tessera" />
+  <meta property="og:title" content="자재 · Tessera" />
+  <meta property="og:description" content="마루 · 타일 · 벽지 · 도장 · 석재 · 패널 · 벽돌 34종을 공간 · 색 · 마감 · 가격으로 찾아봅니다." />
+  <meta property="og:image" content="https://flawlessjimmy.github.io/tessera/og-image.jpg?v=1" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="style.css?v=11" />
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }</script>
+</head>
+<body data-page="materials" class="sub">
+  <header class="nav"></header>
+
+  <main class="page">
+    <div class="wrap">
+      <div class="page-head">
+        <div>
+          <p class="crumb"><a href="index.html">홈</a><span>/</span>자재</p>
+          <h1 class="page-title">자재 찾기<span class="count" id="total"></span></h1>
+        </div>
+        <form class="big-search" id="searchForm" role="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+          <input type="search" id="q" placeholder="이름, 색, 공간으로 찾기 · 예: 화이트 타일, 욕실 바닥" aria-label="자재 검색" />
+        </form>
+      </div>
+      <nav class="cat-tabs" id="catTabs" aria-label="자재 종류"></nav>
+      <section class="cat-intro" id="catIntro" hidden></section>
+      <div class="browse">
+        <aside class="filters" id="filters" aria-label="필터">
+          <div class="filters-head"><b>필터</b><button type="button" class="link-btn" id="resetFilters">초기화</button><button type="button" class="filters-close" id="closeFilters" aria-label="필터 닫기">×</button></div>
+          <div class="filters-body" data-lenis-prevent></div>
+          <button type="button" class="btn filters-apply" id="applyFilters">결과 보기</button>
+        </aside>
+        <div class="results">
+          <div class="toolbar">
+            <button type="button" class="btn btn-outline filter-open" id="openFilters">필터</button>
+            <div class="active-chips" id="activeChips"></div>
+            <label class="sort">정렬
+              <select id="sort">
+                <option value="popular">인기순</option>
+                <option value="new">신상순</option>
+                <option value="low">㎡당 가격 낮은순</option>
+                <option value="high">㎡당 가격 높은순</option>
+              </select>
+            </label>
+          </div>
+          <ul class="mgrid" id="grid"></ul>
+          <div class="empty" id="empty" hidden>
+            <b>조건에 맞는 자재가 없습니다.</b>
+            <p>필터를 줄이거나 다른 말로 찾아보세요.</p>
+            <button type="button" class="btn" id="emptyReset">필터 초기화</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="footer"></footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+  <script src="js/chrome.js?v=1"></script>
+  <script src="js/main.js?v=7"></script>
+  <script type="module" src="js/browse.js?v=1"></script>
+</body>
+</html>

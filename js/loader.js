@@ -313,4 +313,5 @@ if (reduce) {
   // 움직임 줄이기 설정이면 큐브를 완성된 상태로 짧게 보여 주고 넘어갑니다
   cubies.forEach((m) => { m.userData.start = -10; });
 }
-frame();
+// 이미 본 적 있으면(같은 창에서 다시 방문) 로딩을 건너뜁니다
+if (window.__skipLoader) finish(); else frame();
