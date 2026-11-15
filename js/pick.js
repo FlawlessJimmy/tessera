@@ -89,6 +89,15 @@ const HAND_SVG = `<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" 
   </g>
 </svg>`;
 
+// 상판 위 소품: 황동 수전 · 화병과 가지 · 레몬 그릇 (각각 따로 움직이도록 svg 세 장)
+const STONE_PROPS = `
+  <svg class="sp-faucet" viewBox="0 0 60 90"><defs><linearGradient id="br" x1="0" x2="1"><stop offset="0" stop-color="#e7c27a"/><stop offset=".5" stop-color="#b8873a"/><stop offset="1" stop-color="#8a6326"/></linearGradient></defs>
+    <rect x="18" y="80" width="24" height="8" rx="3" fill="url(#br)"/><path d="M30 82 V26 Q30 8 46 8 Q56 8 56 20 V30" fill="none" stroke="url(#br)" stroke-width="7" stroke-linecap="round"/><rect x="8" y="60" width="16" height="5" rx="2.5" fill="url(#br)"/></svg>
+  <svg class="sp-vase" viewBox="0 0 80 140"><path d="M30 138 C14 136 12 110 22 96 C28 88 28 80 28 74 L52 74 C52 80 52 88 58 96 C68 110 66 136 50 138 Z" fill="#e9e3d8"/><path d="M30 138 C20 134 18 112 26 98" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3"/>
+    <g stroke="#5a4636" stroke-width="2" fill="none" stroke-linecap="round"><path d="M40 76 C38 50 30 30 14 8"/><path d="M42 76 C46 52 56 34 70 20"/><path d="M34 46 C26 40 20 40 12 42"/><path d="M50 44 C58 40 64 44 70 48"/></g>
+    <g fill="#c9d3b0"><ellipse cx="14" cy="9" rx="5" ry="3"/><ellipse cx="70" cy="20" rx="5" ry="3"/><ellipse cx="12" cy="42" rx="4" ry="2.5"/><ellipse cx="70" cy="48" rx="4" ry="2.5"/><ellipse cx="22" cy="24" rx="4" ry="2.5"/><ellipse cx="60" cy="32" rx="4" ry="2.5"/></g></svg>
+  <svg class="sp-bowl" viewBox="0 0 110 60"><circle cx="40" cy="26" r="13" fill="#f2c94c"/><circle cx="62" cy="24" r="13" fill="#f4d35e"/><circle cx="52" cy="14" r="12" fill="#efc341"/><path d="M6 30 H104 C100 50 82 58 55 58 C28 58 10 50 6 30 Z" fill="#2f3a34"/><path d="M6 30 H104" stroke="#55665d" stroke-width="3"/></svg>`;
+
 // ---------- 장면 ----------
 // 모든 장면은 (무대, 자재, 타임라인)을 받아 DOM을 만들고 움직임을 타임라인에 넣습니다.
 // 조각들은 같은 텍스처를 제자리 좌표로 잘라 쓰기 때문에, 다 깔리고 나면 이음새 없이 한 장이 됩니다.
@@ -107,7 +116,7 @@ function piece(parent, m, x, y, w, h, S, W, H) {
   return i;
 }
 
-const SCENES = {
+export const SCENES = {
   // 벽돌: 주황 장갑 손이 흙손으로 시멘트를 한 줄 펴 바르면, 그 위에 벽돌이 한 장씩 톡톡 얹힙니다.
   async brick(scene, m, tl) {
     const pal = await brickPalette(m.id);
@@ -247,15 +256,32 @@ const SCENES = {
 
   // 석재 상판: 큰 판이 내려와 하부장 위에 놓이고, 표면에 빛이 한 번 흐름
   stone(scene, m, tl) {
-    surface(scene, 'sf-backsplash', { left: 0, right: 0, top: 0, bottom: '30%' });
-    const cab = surface(scene, 'sf-cabinet', { left: '9%', right: '9%', bottom: 0, height: '36%' });
-    cab.innerHTML = '<i></i><i></i><i></i>';
-    const slab = surface(scene, 'sf-slab', { left: '6%', right: '6%', bottom: '36%', height: '22%' });
-    slab.innerHTML = `<b class="slab-top" style="background-image:${img(m.id)}"></b><b class="slab-edge" style="background-image:${img(m.id)}"></b><b class="slab-sheen"></b>`;
-    tl.from(slab, { y: -260, opacity: 0, duration: 0.9, ease: 'power2.in' })
-      .to(slab, { y: -6, duration: 0.12, ease: 'power1.out' })
+    // 주방 한 켠: 미장 벽 · 원목 바닥 · 오크 하부장. 상판이 내려와 놓이면 펜던트가 켜지고 소품이 올라옵니다.
+    const el = (cls, css = {}, html = '') => { const d = document.createElement('div'); d.className = cls; Object.assign(d.style, css); d.innerHTML = html; scene.appendChild(d); return d; };
+    el('st-wall');
+    const glow = el('st-glow');
+    el('st-floor', { backgroundImage: `url(${texPath('oak_wood_planks', 'diff')})` });
+    el('st-base');
+    const cab = el('st-cab', {}, `<span class="st-doors">${'<i><b></b></i>'.repeat(3)}</span><span class="st-kick"></span>`);
+    cab.querySelectorAll('.st-doors i').forEach((d) => { d.style.backgroundImage = `url(${texPath('oak_wood_planks', 'diff')})`; });
+    const shade = el('st-shadow');
+    const slab = el('st-slab', {}, `<b class="slab-top" style="background-image:${img(m.id)}"></b><b class="slab-edge" style="background-image:${img(m.id)}"></b><b class="slab-sheen"></b>`);
+    const lamp = el('st-lamp', {}, '<i class="cord"></i><i class="dome"></i><i class="bulb"></i>');
+    const props = el('st-props', {}, STONE_PROPS);
+    gsap.set([glow, props.children], { opacity: 0 });
+    gsap.set(shade, { opacity: 0 });
+    gsap.set(lamp.querySelector('.bulb'), { opacity: 0.25 });
+    tl.from(lamp, { y: -60, duration: 0.7, ease: 'power3.out' })
+      .from(slab, { y: -280, opacity: 0, duration: 0.85, ease: 'power2.in' }, 0.15)
+      .to(shade, { opacity: 1, duration: 0.3 }, '>-0.1')
+      .to(slab, { y: -5, duration: 0.12, ease: 'power1.out' }, '<')
       .to(slab, { y: 0, duration: 0.2, ease: 'power1.in' })
-      .fromTo(slab.querySelector('.slab-sheen'), { xPercent: -120 }, { xPercent: 220, duration: 1.1, ease: 'power2.inOut' }, '+=0.1');
+      // 불이 켜지고 상판 위로 빛이 한 번 스침
+      .to(lamp.querySelector('.bulb'), { opacity: 1, duration: 0.25 }, '+=0.05')
+      .to(glow, { opacity: 1, duration: 0.6, ease: 'power2.out' }, '<')
+      .fromTo(slab.querySelector('.slab-sheen'), { xPercent: -120 }, { xPercent: 260, duration: 1.1, ease: 'power2.inOut' }, '<')
+      // 소품이 차례로 놓임
+      .fromTo(props.children, { y: -24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'back.out(2)', stagger: 0.12 }, '-=0.6');
   },
 
   // 우드 패널: 왼쪽부터 한 줄씩 아래에서 세워짐

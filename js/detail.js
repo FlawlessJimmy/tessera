@@ -2,7 +2,7 @@
 import { MATERIALS, BY_ID, CATS, ROOMS, texPath, won, shopLinks, roomsUsing, roomTotal } from './data.js';
 import { mountStudio } from './studio-ui.js?v=1';
 import { cardHTML } from './cards.js?v=2';
-import { lookHTML } from './looks.js?v=1';
+import { lookHTML } from './looks.js?v=2';
 
 const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);

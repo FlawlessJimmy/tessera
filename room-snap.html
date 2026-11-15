@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="robots" content="noindex" />
+  <title>room snap</title>
+  <style>html,body{margin:0;height:100%;overflow:hidden;background:#111}canvas{display:block;width:100vw;height:100vh}</style>
+  <script type="importmap">{ "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  } }</script>
+</head>
+<body>
+  <!-- 개발용: 방 하나를 사진처럼 찍어 assets/rooms/*.jpg 로 저장할 때 씁니다 -->
+  <canvas id="c"></canvas>
+  <script type="module" src="js/snap.js"></script>
+</body>
+</html>
