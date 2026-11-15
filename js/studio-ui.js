@@ -37,7 +37,7 @@ const MARKUP = (withRail) => `
           <button class="btn btn-small btn-ghost photo-reset">예시 사진</button>
           <label class="photo-scale">무늬 크기 <input type="range" class="photo-range" min="0.4" max="2.5" step="0.05" value="1" /></label>
         </div>
-        <div class="stage-hint photo-hint" data-for="photo">네 모서리 점을 끌어 깔 곳에 맞춰 주세요 · 사진은 이 브라우저 밖으로 나가지 않습니다</div>
+        <div class="stage-hint photo-hint" data-for="photo">네 모서리 점을 끌어 깔 곳에 맞춰 주세요 · 올린 사진은 어디에도 저장되지 않으니 안심하세요</div>
       </div>
       ${withRail ? '<div class="rail" aria-label="자재 바꾸기"></div>' : ''}
     </div>

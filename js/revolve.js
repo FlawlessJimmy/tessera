@@ -32,6 +32,7 @@ const MOOD = {
 const ROLE = [['floor', '바닥'], ['left', '왼쪽 벽'], ['back', '오른쪽 벽'], ['counter', '상판']];
 
 const section = document.getElementById('rv');
+let portrait = false, aspect = 1, portK = 1;
 const canvas = document.getElementById('rvGl');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -166,11 +167,13 @@ function fill(i) {
   }).join('');
   totalEl.textContent = `${won(Math.round(roomTotal(r) / 10000))}만원`;
   goEl.href = `rooms.html#${r.id}`;
+  if (portrait) requestAnimationFrame(resize);
   [...dots.children].forEach((d, k) => d.classList.toggle('is-on', k === i));
   section.dataset.ink = THEME[r.id][1];
   const nav = document.querySelector('.nav');
   if (nav) nav.dataset.ink = THEME[r.id][1];
 }
+let lastBg = '';
 let shown = -1;
 function setRoom(i) {
   if (i === shown) return;
@@ -197,14 +200,26 @@ composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
 // ---------- 화면 크기 ----------
-let portrait = false, aspect = 1;
+// 휴대폰(세로 화면): 방은 위쪽 빈 칸(윗줄 아래 ~ 글 패널 위)에만 보이도록, 화면 중심을 그 칸 가운데로 옮기고 크기를 맞춥니다
+const copyEl = section.querySelector('.rv-copy'), topRow = section.querySelector('.rv-skipbox');
 function resize() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return;
   renderer.setSize(w, h, false);
   composer?.setSize(w, h);
   aspect = w / h;
   camera.aspect = aspect;
   portrait = aspect < 0.95;
+  camera.clearViewOffset();
+  portK = 1;
+  if (portrait && copyEl) {
+    const top = (topRow ? topRow.offsetTop + topRow.offsetHeight : 120) + 8;
+    const bottom = copyEl.offsetTop - 6;
+    const region = Math.max(160, bottom - top);
+    const dy = h * 0.32 - (top + bottom) / 2; // 원래 구도에서 방 가운데는 화면 위에서 약 32% 지점
+    camera.setViewOffset(w, h, 0, Math.round(dy), w, h);
+    portK = Math.min(2.2, Math.max(1, (h * 0.55) / region));
+  }
   camera.updateProjectionMatrix();
 }
 resize();
@@ -304,7 +319,7 @@ function frame() {
   cake.position.y = ee * -0.2;
 
   // 카메라: 쉬는 동안은 방 안을 가깝게, 넘기는 동안은 뒤로 빠져 케이크 전체를
-  const D0 = portrait ? 25 / Math.max(aspect, 0.42) * 0.62 : 21, D1 = D0 * 1.6;
+  const D0 = portrait ? 25 / Math.max(aspect, 0.42) * 0.62 * portK : 21, D1 = D0 * 1.6;
   const Y0 = portrait ? D0 * 0.5 : 10.5, Y1 = portrait ? D0 * 0.9 : 21;
   const offX = portrait ? 0 : -3.6 * (1 - ee * 0.5);
   const lookY = portrait ? -D0 * 0.11 : 0.2;
@@ -330,6 +345,8 @@ function frame() {
   colA.set(THEME[ROOMS[clamp(base, 0, N - 1)].id][0]);
   colB.set(THEME[ROOMS[clamp(base + 1, 0, N - 1)].id][0]);
   scene.background.copy(colA).lerpHSL(colB, ease(f));
+  const bgHex = '#' + scene.background.getHexString();
+  if (bgHex !== lastBg) { lastBg = bgHex; section.style.setProperty('--rvbg', bgHex); }
 
   composer.render();
 }
