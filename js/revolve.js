@@ -3,6 +3,11 @@
 // 넘어가는 동안 카메라가 뒤로 빠져 케이크 전체를 보여 주고, 배경색이 다음 방 색으로 바뀝니다.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ROOMS, BY_ID, CATS, texPath, won, roomTotal } from './data.js';
 import { getMaterial, manager } from './materials.js';
 import { C, meterBox, buildProps, H } from './props.js';
@@ -13,6 +18,16 @@ const R = 5.6, FT = 0.34, WT = 0.07;
 const THEME = {
   nordic: ['#e9e3d8', 'dark'], japandi: ['#d6c9b4', 'dark'], kitchen: ['#2b5545', 'light'], bath: ['#1b2c4b', 'light'],
   atelier: ['#b45c39', 'light'], loft: ['#232323', 'light'], powder: ['#efc3c6', 'dark'],
+};
+// 방마다 조명이 다릅니다: 이름 · 큰 조명 색과 세기 · 전구 색
+const MOOD = {
+  nordic: { label: '창으로 드는 자연광 5600K', key: '#f3f6ff', ki: 1, glow: '#ffd9a6', gi: 2.4 },
+  japandi: { label: '은은한 전구색 2700K', key: '#ffcb8e', ki: 0.42, glow: '#ffb35a', gi: 2.2 },
+  kitchen: { label: '형광등 주광색 5000K', key: '#eef4ff', ki: 0.62, glow: '#f4f8ff', gi: 2.6 },
+  bath: { label: '거울 백라이트 6000K', key: '#dde8ff', ki: 0.7, glow: '#e2edff', gi: 3 },
+  atelier: { label: '핀 조명 3000K', key: '#ffd9a8', ki: 0.8, glow: '#ffcf8f', gi: 3 },
+  loft: { label: '에디슨 전구 2200K', key: '#ffb46a', ki: 0.4, glow: '#ff9a3a', gi: 4 },
+  powder: { label: '화장대 전구 2700K', key: '#ffd0c2', ki: 0.6, glow: '#ffc49a', gi: 2.6 },
 };
 const ROLE = [['floor', '바닥'], ['left', '왼쪽 벽'], ['back', '오른쪽 벽'], ['counter', '상판']];
 
@@ -34,16 +49,21 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(THEME[ROOMS[0].id][0]);
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.5;
 const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
 
-const sun = new THREE.DirectionalLight('#fff4e4', 2.5);
-sun.position.set(-7, 12, 9);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
-sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; sun.shadow.radius = 6;
-scene.add(sun, new THREE.HemisphereLight('#fbf6ee', '#8f8170', 0.85));
+// 앞에 온 방만 비추는 큰 조명 (세상에 고정 → 케이크가 돌면 다음 방이 빛 속으로 들어옴)
+RectAreaLightUniformsLib.init();
+const key = new THREE.SpotLight('#ffffff', 60, 0, 0.62, 0.75, 1);
+key.position.set(-2.6, 8.6, 7.4);
+key.target.position.set(0.2, 0, 2.5);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; key.shadow.radius = 5;
+key.shadow.camera.near = 2; key.shadow.camera.far = 25;
+scene.add(key, key.target);
+const hemi = new THREE.HemisphereLight('#f4efe8', '#5a5048', 0.22);
+scene.add(hemi);
+scene.environmentIntensity = 0.16;
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.ShadowMaterial({ opacity: 0.22 }));
 ground.rotation.x = -Math.PI / 2; ground.position.y = -FT - 0.002; ground.receiveShadow = true;
 scene.add(ground);
@@ -73,9 +93,12 @@ const comps = [0, 1, 2, 3].map((c) => {
   [back, left].forEach((w) => { w.castShadow = w.receiveShadow = true; });
   const props = new THREE.Group();
   props.position.set(2 + WT, 0, 2 + WT); // 가구 좌표(4m 방, 벽 안쪽 -2)를 칸 모서리에 맞춤
-  g.add(floor, back, left, props);
+  // 방마다 켜는 전구 두 개 + 형광등 같은 면 조명 하나 (방이 바뀌면 위치 · 색만 바꿈)
+  const pts = [0, 1].map(() => { const l = new THREE.PointLight('#fff', 0, 4, 2); g.add(l); return l; });
+  const rect = new THREE.RectAreaLight('#fff', 0, 1, 1);
+  g.add(floor, back, left, props, rect);
   cake.add(g);
-  return { g, floor, back, left, props, room: -1 };
+  return { g, floor, back, left, props, pts, rect, room: -1, info: null };
 });
 
 const propCache = {};
@@ -88,8 +111,26 @@ function dress(c, i) {
   comp.back.material[4] = getMaterial(BY_ID[r.back]).mat;
   comp.left.material[0] = getMaterial(BY_ID[r.left]).mat;
   comp.props.clear();
-  propCache[i] ||= buildProps(r.props, r.counter ? getMaterial(BY_ID[r.counter]).mat : C.white);
+  const mood = MOOD[r.id];
+  propCache[i] ||= buildProps(r.props, r.counter ? getMaterial(BY_ID[r.counter]).mat : C.white, { wallLen: R, glowColor: mood.glow, glowIntensity: mood.gi });
   comp.props.add(propCache[i]);
+  // 이 방 조명 자리 잡기 (가구 좌표 → 칸 좌표)
+  const info = propCache[i].userData, o = comp.props.position;
+  comp.info = info;
+  comp.pts.forEach((l, k) => {
+    const d = info.lights[k];
+    l.userData.base = d ? d.i : 0;
+    if (d) { l.position.set(d.p[0] + o.x, d.p[1], d.p[2] + o.z); l.color.set(d.c); l.distance = d.d; }
+  });
+  const rc = info.rect;
+  comp.rect.userData.base = rc ? rc.i : 0;
+  if (rc) {
+    comp.rect.position.set(rc.p[0] + o.x, rc.p[1], rc.p[2] + o.z);
+    comp.rect.width = rc.w; comp.rect.height = rc.h; comp.rect.color.set(rc.c);
+    comp.rect.rotation.set(0, 0, 0);
+    if (rc.face === 'down') comp.rect.rotation.x = -Math.PI / 2;
+    else comp.rect.rotation.y = -Math.PI / 2; // 왼쪽 벽 창 → 방 안쪽(+x)을 향함
+  }
 }
 // 지금 위치 앞뒤로 네 방을 네 칸에 나눠 담습니다. (뒤쪽 칸은 안 보일 때 바꿔 끼움)
 function assign(pos) {
@@ -100,6 +141,7 @@ assign(0);
 
 // ---------- 글자 ----------
 const $ = (s) => section.querySelector(s);
+const lightEl = $('#rvLight');
 const idxEl = $('#rvIdx'), nameEl = $('#rvName'), lineEl = $('#rvLine'), listEl = $('#rvList'), totalEl = $('#rvTotal'), goEl = $('#rvGo');
 const dots = $('#rvDots');
 dots.innerHTML = ROOMS.map((r, i) => `<button type="button" aria-label="${r.ko}"><i></i></button>`).join('');
@@ -108,6 +150,7 @@ function fill(i) {
   idxEl.textContent = String(i + 1).padStart(2, '0');
   nameEl.textContent = r.ko;
   lineEl.textContent = r.line;
+  lightEl.innerHTML = `<i style="background:${MOOD[r.id].glow};color:${MOOD[r.id].glow}"></i>조명 · ${MOOD[r.id].label}`;
   listEl.innerHTML = ROLE.filter(([k]) => r[k]).map(([k, label]) => {
     const m = BY_ID[r[k]];
     return `<li><a href="material.html?id=${m.id}"><i style="background-image:url(${texPath(m.id, 'thumb')})"></i><span><small>${label} · ${CATS[m.cat].ko}</small><b>${m.ko}</b></span></a></li>`;
@@ -135,11 +178,21 @@ function setRoom(i) {
 }
 setRoom(0);
 
+// ---------- 후처리: 전구만 은은하게 번지게 ----------
+let composer = null;
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.45, 0.5, 1.0);
+composer = new EffectComposer(renderer);
+composer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 860 ? 1.25 : 1.6));
+composer.addPass(new RenderPass(scene, camera));
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
 // ---------- 화면 크기 ----------
 let portrait = false, aspect = 1;
 function resize() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
   renderer.setSize(w, h, false);
+  composer?.setSize(w, h);
   aspect = w / h;
   camera.aspect = aspect;
   portrait = aspect < 0.95;
@@ -229,11 +282,25 @@ function frame() {
   look.set(offX, THREE.MathUtils.lerp(lookY, lookY - 0.8, ee), THREE.MathUtils.lerp(1.6, 0, ee));
   camera.lookAt(look);
 
+  // 조명: 정면에 온 칸일수록 불이 켜지고, 옆 · 뒤 칸은 꺼집니다.
+  comps.forEach((comp, c) => {
+    let off = (c * Math.PI) / 2 + cake.rotation.y + Math.PI / 4;
+    off = Math.atan2(Math.sin(off), Math.cos(off));
+    const a = Math.pow(clamp(1 - Math.abs(off) / (Math.PI / 2)), 1.6);
+    comp.pts.forEach((l) => { l.intensity = l.userData.base * a; });
+    comp.rect.intensity = comp.rect.userData.base * a;
+    comp.info?.glows.forEach((m) => { m.emissiveIntensity = m.userData.base * (0.03 + 0.97 * a); });
+  });
+  const mA = MOOD[ROOMS[clamp(base, 0, N - 1)].id], mB = MOOD[ROOMS[clamp(base + 1, 0, N - 1)].id];
+  const fe = ease(f);
+  key.color.set(mA.key).lerp(colB.set(mB.key), fe);
+  key.intensity = 46 * THREE.MathUtils.lerp(mA.ki, mB.ki, fe) * (1 - 0.35 * bump);
+
   // 배경색: 지금 방 → 다음 방
   colA.set(THEME[ROOMS[clamp(base, 0, N - 1)].id][0]);
   colB.set(THEME[ROOMS[clamp(base + 1, 0, N - 1)].id][0]);
   scene.background.copy(colA).lerpHSL(colB, ease(f));
 
-  renderer.render(scene, camera);
+  composer.render();
 }
 frame();
