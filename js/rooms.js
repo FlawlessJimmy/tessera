@@ -14,7 +14,7 @@ const AXIS = new THREE.Vector3(1, 0, -1).normalize(); // 화면에서 가로로 
 
 export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 861 ? 1.35 : 1.75));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -92,9 +92,20 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
   let scrollP = 0, sel = -1, hover = -1;
   const target = new THREE.Vector3(), want = new THREE.Vector3();
   let zoom = 1;
-  ScrollTrigger.create({
+  const roomsST = ScrollTrigger.create({
     trigger: section, start: 'top top', end: () => '+=' + innerHeight * 0.55 * (ROOMS.length - 1),
     pin: true, scrub: true, onUpdate: (s) => { scrollP = s.progress; },
+  });
+  // 스크롤을 멈추면 가장 가까운 방 앞에 부드럽게 멈춥니다
+  let snapT = null;
+  window.lenis?.on('scroll', () => {
+    clearTimeout(snapT);
+    const y = window.lenis.scroll, st = roomsST;
+    if (sel >= 0 || y <= st.start + 2 || y >= st.end - 2) return;
+    snapT = setTimeout(() => {
+      const n = ROOMS.length - 1, i = Math.round(scrollP * n);
+      if (Math.abs(scrollP * n - i) > 0.02) window.lenis.scrollTo(st.start + (i / n) * (st.end - st.start), { duration: 0.9, easing: (x) => 1 - Math.pow(1 - x, 3) });
+    }, 160);
   });
 
   const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
@@ -160,7 +171,7 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
       if (desk.matches) want.addScaledVector(AXIS, viewH * (W / Hh) * 0.15 / 1.6);
     } else want.copy(AXIS).multiplyScalar(scrollP * span);
     want.y = 0.9;
-    target.lerp(want, sel >= 0 || Math.abs(zoom - 1) > 0.01 ? 0.08 : 0.35);
+    target.lerp(want, sel >= 0 || Math.abs(zoom - 1) > 0.01 ? 0.08 : 0.12);
     zoom += ((sel >= 0 ? 1.6 : 1) - zoom) * 0.08;
     cam.zoom = zoom; cam.updateProjectionMatrix();
     cam.position.copy(target).addScaledVector(DIR, 40);
@@ -177,6 +188,7 @@ export function createRooms({ section, canvas, labelsEl, panel, onPick }) {
       l.style.transform = `translate(${(tmp.x + 1) / 2 * W}px, ${(1 - tmp.y) / 2 * Hh + 14}px) translateX(-50%)`;
       l.style.opacity = tmp.x < -1.2 || tmp.x > 1.2 ? 0 : sel >= 0 && sel !== i ? 0.25 : 1;
     });
+    if (W > 0 && !labelsEl.classList.contains('is-live')) labelsEl.classList.add('is-live');
     renderer.render(scene, cam);
   })();
   return { select, count: ROOMS.length };

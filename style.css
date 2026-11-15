@@ -1371,3 +1371,12 @@ em { font-weight: inherit; }
   .rv-total > span:first-child { font-size: 12px; }
   .rv-go { flex: none; height: 44px; padding: 0 16px; font-size: 14px; }
 }
+
+/* 2026-11-16: 방 이름표는 위치를 잡은 뒤에 보이기 · 안내 문구 가운데 정렬 */
+.room-labels:not(.is-live) .room-label { opacity: 0 !important; transition: none; }
+.rooms-hint { text-align: center; width: max-content; max-width: calc(100vw - 40px); line-height: 1.5; }
+/* 자재 카드: 사진과 이름·가격은 붙이고, 카드와 카드 사이는 넓게 (한 자재가 한 덩어리로 보이게) */
+.mcard-body { padding-top: 10px; gap: 0; }
+.mcard-price { margin-top: 4px; }
+.mgrid { row-gap: clamp(44px, 4.4vw, 64px); }
+@media (max-width: 860px) { .mgrid { row-gap: 36px; column-gap: 14px; } .mcard-body { padding-top: 9px; } .rooms-hint { white-space: normal; bottom: auto; top: calc(100svh - 270px - env(safe-area-inset-bottom)); font-size: 12px; } }
