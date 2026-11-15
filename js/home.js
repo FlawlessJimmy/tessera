@@ -1,5 +1,5 @@
 // 홈 아래쪽: 바뀌는 한 단어 · 고르는 순간 깔리는 자재 · 공간 모자이크 · 자재로 완성한 방
-import { MATERIALS, ROOMS, BY_ID, texPath, won, roomTotal } from './data.js';
+import { MATERIALS, ROOMS, texPath } from './data.js';
 import { mountPick } from './pick.js?v=1';
 
 const $ = (s) => document.querySelector(s);
@@ -53,19 +53,4 @@ $('#spaceMosaic').innerHTML = Object.entries(SPACE_ROOM).map(([s, rid], i) => {
   </a>`;
 }).join('');
 
-// ---------- 자재로 완성한 방: 지그재그 카드 ----------
-$('#lookList').innerHTML = ['kitchen', 'nordic', 'bath', 'atelier', 'powder'].map((id) => {
-  const r = ROOMS.find((x) => x.id === id);
-  const used = ['floor', 'back', 'left', 'counter'].filter((k) => r[k]).map((k) => BY_ID[r[k]]);
-  return `<li><a class="q-card" href="rooms.html#${r.id}">
-    <p class="q-line">${r.line}</p>
-    <span class="q-meta">${r.ko} · 4m × 4m 자재비 약 ${won(Math.round(roomTotal(r) / 10000))}만원</span>
-    <span class="q-sw">${used.map((m) => `<i style="${thumb(m.id)}" title="${m.ko}"></i>`).join('')}</span>
-  </a></li>`;
-}).join('');
-
-// 카드가 차례로 떠오르기
-gsap.utils.toArray('.q-card').forEach((el) => {
-  gsap.from(el, { y: 50, opacity: 0, duration: 0.9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } });
-});
 gsap.from('.space-tile', { y: 40, opacity: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out', scrollTrigger: { trigger: '#spaceMosaic', start: 'top 80%' } });

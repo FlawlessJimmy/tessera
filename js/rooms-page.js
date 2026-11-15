@@ -1,6 +1,6 @@
 // Room Looks 페이지: 방 모형 7개 · 주소의 #방이름으로 바로 열기
 import { ROOMS } from './data.js';
-import { createRooms } from './rooms.js?v=3';
+import { createRooms } from './rooms.js?v=4';
 
 const $ = (s) => document.querySelector(s);
 const rooms = createRooms({

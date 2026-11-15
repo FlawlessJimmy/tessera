@@ -1,6 +1,6 @@
-// 부드러운 스크롤 · (홈) 로딩 → 랜딩 · 등장 모션 · 공통 동작
+// 부드러운 스크롤 · 등장 모션 · 공통 동작
 gsap.registerPlugin(ScrollTrigger);
-const isHome = !!document.getElementById('hero');
+const isHome = document.body.dataset.page === 'home';
 
 // 휠을 한 칸 굴릴 때마다 끊어 움직이지 않고, 관성처럼 이어서 흐르게 합니다 (lerp 방식)
 const lenis = new Lenis({ lerp: 0.09, smoothWheel: true, wheelMultiplier: 0.9, touchMultiplier: 1.4 });
@@ -9,45 +9,15 @@ lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
 gsap.ticker.lagSmoothing(0);
 
-if (isHome) {
-  lenis.stop();
-  scrollTo(0, 0);
-  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+document.documentElement.classList.remove('is-loading');
+if ('scrollRestoration' in history && isHome) { history.scrollRestoration = 'manual'; scrollTo(0, 0); }
 
-  // ---------- 로딩 → 랜딩 ----------
-  // 큐브 로딩(js/loader.js)이 끝나면 window.tesseraReveal()을 불러 랜딩 글자를 올립니다.
-  let revealed = false;
-  window.__heroIntro = { v: 1 };
-  window.tesseraReveal = function () {
-    if (revealed) return;
-    revealed = true;
-    // 로딩이 화면 가득 채운 마루 면 그대로에서 시작해, 둥근 화면으로 줄어들며 제목이 올라옵니다.
-    gsap.timeline({ onComplete: () => { document.documentElement.classList.remove('is-loading'); lenis.start(); ScrollTrigger.refresh(); } })
-      .to(window.__heroIntro, { v: 0, duration: 1.6, ease: 'expo.inOut' }, 0.05)
-      .from('.hero-title', { yPercent: 35, opacity: 0, duration: 1.2, ease: 'power4.out' }, 0.75)
-      .from('.nav', { y: -20, opacity: 0, duration: 0.9, ease: 'power3.out' }, 0.8);
-  };
-
-  // 큐브 로딩은 처음 방문했을 때만. 같은 창에서 다시 오면 바로 엽니다.
-  let seen = false;
-  try { seen = sessionStorage.getItem('tessera-seen') === '1'; sessionStorage.setItem('tessera-seen', '1'); } catch (e) { /* 저장 불가 환경 */ }
-  if (seen) {
-    window.__skipLoader = true;
-    document.querySelector('.loader')?.classList.add('is-skipped');
-    requestAnimationFrame(() => window.tesseraReveal());
-  }
-
-  // 3D를 못 쓰는 환경이면 로딩을 걷고 바로 엽니다.
-  const fallback = () => {
-    const ld = document.querySelector('.loader');
-    if (ld) gsap.to(ld, { opacity: 0, duration: 0.6, onComplete: () => ld.remove() });
-    window.tesseraReveal();
-  };
-  setTimeout(() => { if (!window.__loaderAlive) fallback(); }, 5000);
-  setTimeout(() => { if (!revealed) fallback(); }, 20000);
-
-} else {
-  document.documentElement.classList.remove('is-loading');
+// 홈: 짙은 바탕 구간에 들어가면 머리말도 어둡게
+if (isHome && document.querySelector('.dark-flow')) {
+  ScrollTrigger.create({
+    trigger: '.dark-flow', start: 'top 64px', end: 'max', refreshPriority: -1,
+    onToggle: (s) => document.querySelector('.nav').classList.toggle('is-dark', s.isActive),
+  });
 }
 
 // ---------- 등장 모션 (가볍게) ----------

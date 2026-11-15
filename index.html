@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="is-loading">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:image" content="https://flawlessjimmy.github.io/tessera/og-image.jpg?v=1" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  <link rel="stylesheet" href="style.css?v=12" />
+  <link rel="stylesheet" href="style.css?v=13" />
   <script type="importmap">{ "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
     "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
@@ -24,47 +24,29 @@
 <body data-page="home" class="is-home">
 
 
-  <!-- 로딩 -->
-  <div class="loader" aria-hidden="true">
-    <div class="ld-top">
-      <span class="ld-logo"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" rx="1"/><rect x="13" y="2" width="9" height="9" rx="1"/><rect x="2" y="13" width="9" height="9" rx="1"/><rect class="lift" x="14.5" y="14.5" width="9" height="9" rx="1"/></svg>Tessera</span>
-      <span class="ld-credit">Surface Studio — a concept by Nyeongho Sim</span>
-    </div>
-    <canvas class="ld-gl"></canvas>
-    <div class="ld-bottom">
-      <div class="ld-count"><span class="ld-num">0</span><span class="ld-pct">%</span></div>
-      <div class="ld-now">
-        <span class="ld-label">Fitting surfaces</span>
-        <span class="ld-name"><b>Preparing</b></span>
-      </div>
-    </div>
-    <div class="ld-bar"><i></i></div>
-  </div>
-
-
   <header class="nav"></header>
 
   <main id="top">
-    <!-- ============ HERO: 큰 제목 + 둥근 화면 (스크롤하면 화면 가득) ============ -->
-    <section class="hero" id="hero">
-      <div class="hero-head">
-        <h1 class="hero-title">깔기 전에<br class="m-br" /> 먼저 보는 자재.</h1>
-      </div>
-      <div class="hero-stage">
-        <canvas id="hero-gl"></canvas>
-        <div class="hero-shade"></div>
-        <div class="hero-cap">
-          <div class="cap-row"><span class="cap-swap" data-cap="idx">01 / 05</span></div>
-          <div class="cap-row"><strong class="cap-swap" data-cap="ko">헤링본 오크 원목마루</strong></div>
-          <div class="cap-row"><span class="cap-swap cap-spec" data-cap="spec"></span></div>
-        </div>
-        <div class="hero-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></div>
-        <div class="hero-final">
-          <h2>타일 한 장의<br />모든 디테일.</h2>
-          <p class="hero-final-sub">자재 34가지를 손에 든 것처럼 돌려 보고, 내 방에 깔아 보고, 평수로 자재비를 계산합니다.</p>
-          <a href="materials.html" class="btn btn-light">자재 둘러보기 <span>→</span></a>
+    <!-- ============ 랜딩: 회전문 케이크 (넘기면 다음 방) ============ -->
+    <section class="rv" id="rv" data-ink="dark">
+      <canvas class="rv-gl" id="rvGl"></canvas>
+      <h1 class="sr">Tessera · 깔기 전에 먼저 보는 자재</h1>
+      <div class="rv-copy">
+        <p class="rv-kicker"><span class="rv-row"><span class="rv-swap"><b id="rvIdx">01</b> / 07 · 자재로 완성한 방</span></span></p>
+        <h2 class="rv-title"><span class="rv-row"><span class="rv-swap" id="rvName">노르딕 거실</span></span></h2>
+        <p class="rv-line"><span class="rv-row"><span class="rv-swap" id="rvLine"></span></span></p>
+        <ul class="rv-list" id="rvList"></ul>
+        <div class="rv-foot">
+          <p class="rv-total"><span>4m × 4m 자재비 약</span><span class="rv-row"><strong class="rv-swap" id="rvTotal"></strong></span></p>
+          <a class="btn rv-go" id="rvGo" href="rooms.html">이 방 자세히 보기 <span>→</span></a>
         </div>
       </div>
+      <div class="rv-nav">
+        <button type="button" class="rv-arrow" id="rvPrev" aria-label="이전 방"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="rv-dots" id="rvDots"></div>
+        <button type="button" class="rv-arrow" id="rvNext" aria-label="다음 방"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <p class="rv-hint">스크롤해서 다음 방으로 넘기기</p>
     </section>
 
     <div class="dark-flow">
@@ -109,18 +91,6 @@
         </div>
       </section>
 
-      <!-- ============ 자재로 완성한 방 ============ -->
-      <section class="looks-q">
-        <div class="wrap q-grid">
-          <div class="q-side">
-            <h2 class="sec-h">자재로<br />완성한 방.</h2>
-            <p class="sec-p">바닥 · 벽 · 상판을 한 방에 맞춘 조합입니다. 누르면 방 모형으로 열립니다.</p>
-            <a class="more" href="rooms.html">방 7개 모두 보기 <span>→</span></a>
-          </div>
-          <ul class="q-list" id="lookList"></ul>
-        </div>
-      </section>
-
       <!-- ============ 스튜디오로 ============ -->
       <section class="cta">
         <div class="wrap">
@@ -142,9 +112,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
   <script src="js/chrome.js?v=2"></script>
-  <script src="js/main.js?v=8"></script>
-  <script type="module" src="js/loader.js?v=2"></script>
-  <script type="module" src="js/hero.js?v=6"></script>
-  <script type="module" src="js/home.js?v=2"></script>
+  <script src="js/main.js?v=9"></script>
+  <script type="module" src="js/revolve.js?v=1"></script>
+  <script type="module" src="js/home.js?v=3"></script>
 </body>
 </html>
