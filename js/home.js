@@ -73,27 +73,43 @@ drum.innerHTML = SPACES_SHOW.map((x) => `<a class="sp-card" href="materials.html
 const cards = [...drum.children];
 const NS = SPACES_SHOW.length;
 const spCount = (s) => MATERIALS.filter((m) => m.spaces.includes(s)).length;
-function spFill(i) {
+// 글자는 스크롤 위치에 그대로 묶여, 지금 글자가 위로 올라가는 만큼 다음 글자가 아래에서 올라옵니다.
+// (사라졌다 나타나는 빈 순간이 없도록 두 줄을 같은 칸에 겹쳐 둡니다.)
+const spRows = ['spName', 'spRoom', 'spLine', 'spGoText'].map((id) => {
+  const row = $('#' + id).parentElement;
+  row.innerHTML = '<span class="sp-swap"></span><span class="sp-swap"></span>';
+  return [...row.children];
+});
+const spText = (i) => {
   const x = SPACES_SHOW[i], r = ROOMS.find((y) => y.id === x.room);
-  $('#spIdx').textContent = String(i + 1).padStart(2, '0');
-  $('#spName').textContent = x.s;
-  $('#spRoom').textContent = r.ko;
-  $('#spLine').textContent = x.line;
-  $('#spGoText').textContent = `${x.s} 자재 ${spCount(x.s)}가지 보기`;
-  $('#spGo').href = `materials.html?space=${encodeURIComponent(x.s)}`;
+  return [x.s, r.ko, x.line, `${x.s} 자재 ${spCount(x.s)}가지 보기`];
+};
+let spLo = -1, spNear = -1;
+function spRender(pos) {
+  const lo = Math.min(NS - 2, Math.max(0, Math.floor(pos)));
+  const f = Math.min(1, Math.max(0, pos - lo));
+  if (lo !== spLo) {
+    spLo = lo;
+    const A = spText(lo), B = spText(lo + 1);
+    spRows.forEach(([a, b], k) => { a.textContent = A[k]; b.textContent = B[k]; });
+  }
+  spRows.forEach(([a, b], k) => {
+    // 줄마다 조금씩 늦게 따라와 계단처럼 넘어갑니다.
+    let t = Math.min(1, Math.max(0, (f - k * 0.06) / 0.82));
+    t = t * t * (3 - 2 * t);
+    a.style.transform = `translateY(${-t * 105}%)`;
+    a.style.opacity = 1 - t * 0.6;
+    b.style.transform = `translateY(${(1 - t) * 105}%)`;
+    b.style.opacity = 0.4 + t * 0.6;
+  });
+  const near = Math.round(pos);
+  if (near !== spNear) {
+    spNear = near;
+    $('#spIdx').textContent = String(near + 1).padStart(2, '0');
+    $('#spGo').href = `materials.html?space=${encodeURIComponent(SPACES_SHOW[near].s)}`;
+  }
 }
-let spShown = 0;
-spFill(0);
-function spSet(i) {
-  if (i === spShown) return;
-  const dir = i > spShown ? 1 : -1;
-  spShown = i;
-  const rows = document.querySelectorAll('#spaces .sp-swap');
-  gsap.timeline()
-    .to(rows, { yPercent: -110 * dir, opacity: 0, duration: 0.3, ease: 'power2.in', stagger: 0.03, overwrite: true })
-    .add(() => spFill(spShown))
-    .fromTo(document.querySelectorAll('#spaces .sp-swap'), { yPercent: 110 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.7, ease: 'power3.out', stagger: 0.05 });
-}
+spRender(0);
 
 let spTarget = 0, spPos = 0;
 const spST = ScrollTrigger.create({
@@ -128,7 +144,7 @@ gsap.ticker.add(() => {
     c.style.filter = `brightness(${1 - Math.min(a, 1.4) * 0.32})`;
     c.style.visibility = vis <= 0 ? 'hidden' : 'visible';
   });
-  spSet(Math.max(0, Math.min(NS - 1, Math.round(spPos))));
+  spRender(Math.max(0, Math.min(NS - 1, spPos)));
 });
 
 // 확인용: ?sp=1.5 → 공간 드럼 그 위치로, ?pick=stone → 자재 고르기 그 종류로

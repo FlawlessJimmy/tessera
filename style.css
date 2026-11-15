@@ -1331,8 +1331,8 @@ em { font-weight: inherit; }
 .sp-kicker b { color: #fff; font-variant-numeric: tabular-nums; }
 .sp-title { display: flex; align-items: center; gap: 0.12em; margin-top: 16px; font-size: clamp(56px, 7vw, 108px); font-weight: 800; line-height: 1.1; letter-spacing: -0.04em; }
 .sp-title i { font-style: normal; font-weight: 300; color: var(--accent); }
-.sp-row { display: block; overflow: hidden; }
-.sp-swap { display: inline-block; }
+.sp-row { display: grid; overflow: hidden; justify-items: start; }
+.sp-row > .sp-swap { grid-area: 1 / 1; display: block; will-change: transform; }
 .sp-room { margin-top: 18px; font-size: 15px; font-weight: 800; letter-spacing: 0.02em; color: var(--accent); }
 .sp-line { margin-top: 10px; font-size: 17px; line-height: 1.7; color: var(--on-dark-2); }
 .sp-go { display: inline-flex; align-items: center; gap: 10px; margin-top: 28px; height: 52px; padding: 0 22px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); font-weight: 700; transition: background 0.25s; }

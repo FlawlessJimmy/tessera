@@ -232,7 +232,25 @@ window.lenis?.on('scroll', () => {
 const go = (i) => window.lenis?.scrollTo(yOf(clamp(i, 0, N - 1)), { duration: 2.1, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
 dots.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go([...dots.children].indexOf(b)); });
 // 가운데 아래 버튼: 랜딩을 건너뛰고 바로 아래 내용으로
-$('#rvSkip').addEventListener('click', () => window.lenis?.scrollTo(document.querySelector('.dark-flow') || st.end + innerHeight, { immediate: true, force: true }));
+// 방이 빠르게 도는 모습은 보이지 않게 잠깐 어두워졌다가, 아래 내용이 부드럽게 미끄러져 올라옵니다.
+const veil = document.createElement('div');
+veil.style.cssText = 'position:fixed;inset:0;z-index:300;background:#101010;opacity:0;pointer-events:none';
+document.body.appendChild(veil);
+$('#rvSkip').addEventListener('click', () => {
+  const L = window.lenis;
+  if (!L) return;
+  const flow = document.querySelector('.dark-flow');
+  const Y = flow ? flow.getBoundingClientRect().top + L.scroll : st.end + innerHeight;
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+  if (reduce) { L.scrollTo(Y, { immediate: true, force: true }); return; }
+  gsap.to(veil, { opacity: 1, duration: 0.32, ease: 'power2.in', overwrite: true, onComplete: () => {
+    L.scrollTo(Math.max(st.end + 2, Y - innerHeight * 0.6), { immediate: true, force: true });
+    requestAnimationFrame(() => {
+      L.scrollTo(Y, { duration: 1.15, easing: ease, force: true });
+      gsap.to(veil, { opacity: 0, duration: 0.75, ease: 'power2.out', delay: 0.05 });
+    });
+  } });
+});
 $('#rvPrev').addEventListener('click', () => go(Math.round(target) - 1));
 $('#rvNext').addEventListener('click', () => (Math.round(target) >= N - 1 ? window.lenis?.scrollTo(st.end + 2, { duration: 1 }) : go(Math.round(target) + 1)));
 
