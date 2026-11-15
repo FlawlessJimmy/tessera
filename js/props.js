@@ -49,9 +49,15 @@ const fabric = (color, rough = 0.95) => new THREE.MeshStandardMaterial({ color, 
 const velvet = (color) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.75, sheen: 1, sheenRoughness: 0.4, sheenColor: new THREE.Color(color).offsetHSL(0, -0.1, 0.25), bumpMap: weave, bumpScale: 0.5 });
 const leather = (color) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.5, bumpMap: weave, bumpScale: 0.25 });
 // 나무: 실제 원목 사진을 결 방향으로 깔고 색만 바꿉니다
-const woodTex = tl.load(texPath('oak_wood_planks', 'diff'));
+// (사진이 받아진 뒤에 붙여서, 받는 동안 가구가 까맣게 보이지 않게)
+const woodMats = [];
+const woodTex = tl.load(texPath('oak_wood_planks', 'diff'), () => woodMats.forEach((m) => { m.map = woodTex; m.needsUpdate = true; }));
 woodTex.colorSpace = THREE.SRGBColorSpace; woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping; woodTex.repeat.set(0.6, 0.6); woodTex.anisotropy = 8;
-const wood = (tint, rough = 0.55) => new THREE.MeshStandardMaterial({ color: tint, map: woodTex, roughness: rough });
+const wood = (tint, rough = 0.55) => {
+  const m = new THREE.MeshStandardMaterial({ color: tint, roughness: rough });
+  if (woodTex.image) m.map = woodTex; else woodMats.push(m);
+  return m;
+};
 const M = (color, rough = 0.6, metal = 0, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, ...extra });
 const glass = (tint = '#ffffff', op = 0.25) => new THREE.MeshPhysicalMaterial({ color: tint, roughness: 0.05, transmission: 0.9, thickness: 0.02, transparent: true, opacity: op });
 
@@ -101,7 +107,7 @@ export const C = {
   black: M('#1c1b1a', 0.45, 0.3),
   steel: M('#c9ccce', 0.28, 0.85),
   brass: M('#c79a52', 0.3, 0.9),
-  ceramic: M('#f6f4ef', 0.18),
+  ceramic: M('#f6f4ef', 0.32),
   mirror: M('#e4eaee', 0.02, 1),
   water: new THREE.MeshPhysicalMaterial({ color: '#cfe3e6', roughness: 0.02, transmission: 0.6, transparent: true, opacity: 0.8 }),
   paper: M('#fbfaf6', 0.9),
@@ -288,14 +294,14 @@ const PROPS = {
 
   // 네이비 욕실 · 백라이트: 원형 거울 뒤 LED, 독립 욕조, 촛불
   bath(g, ctr, glow) {
-    const tub = rb(1.75, 0.6, 0.82, M('#fbfbf9', 0.12), 0.55, 0.3, B + 0.6, 0.28);
+    const tub = rb(1.75, 0.6, 0.82, M('#fbfbf9', 0.28), 0.55, 0.3, B + 0.6, 0.28);
     g.add(tub, rb(1.55, 0.02, 0.62, C.water, 0.55, 0.52, B + 0.6, 0.2));
     g.add(tube([[1.65, 0, B + 0.6], [1.65, 0.95, B + 0.6], [1.62, 1.02, B + 0.6], [1.5, 0.96, B + 0.6]], 0.016, C.black));
     // 떠 있는 세면대 + 원형 거울 + 뒤 LED 링
     const walnut = wood('#6e4c33', 0.5);
     g.add(rb(0.52, 0.32, 1.15, walnut, L + 0.28, 0.72, 0.35, 0.02));
     const vt = new THREE.Mesh(meterBox(0.56, 0.035, 1.2), [ctr, ctr, ctr, C.cap, ctr, ctr]); vt.position.set(L + 0.29, 0.9, 0.35); shadowy(vt); g.add(vt);
-    const sink = new THREE.Mesh(new THREE.SphereGeometry(0.19, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#ffffff', 0.12, 0, { side: THREE.DoubleSide }));
+    const sink = new THREE.Mesh(new THREE.SphereGeometry(0.19, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#ffffff', 0.25, 0, { side: THREE.DoubleSide }));
     sink.position.set(L + 0.3, 1.08, 0.35); shadowy(sink); g.add(sink);
     g.add(tube([[L + 0.02, 1.25, 0.35], [L + 0.18, 1.25, 0.35], [L + 0.2, 1.2, 0.35]], 0.01, C.black));
     const mir = cyl(0.42, 0.025, C.mirror, L + 0.035, 1.68, 0.35, 64); mir.rotation.z = Math.PI / 2; g.add(mir);
@@ -396,7 +402,7 @@ const PROPS = {
     g.add(rb(1.25, 0.5, 0.5, oak, 0.2, 0.58, B + 0.27, 0.02));
     for (const x of [-0.3, 0.7]) g.add(box(0.04, 0.33, 0.04, C.brass, x, 0.165, B + 0.4));
     const top = new THREE.Mesh(meterBox(1.32, 0.04, 0.56), [ctr, ctr, ctr, C.cap, ctr, ctr]); top.position.set(0.2, 0.85, B + 0.28); shadowy(top); g.add(top);
-    const sink = new THREE.Mesh(new THREE.SphereGeometry(0.17, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#ffffff', 0.12, 0, { side: THREE.DoubleSide }));
+    const sink = new THREE.Mesh(new THREE.SphereGeometry(0.17, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), M('#ffffff', 0.25, 0, { side: THREE.DoubleSide }));
     sink.position.set(0.2, 1.04, B + 0.3); shadowy(sink); g.add(sink);
     g.add(tube([[0.2, 1.3, B + 0.02], [0.2, 1.3, B + 0.15], [0.2, 1.24, B + 0.2]], 0.01, C.brass));
     // 아치 거울 + 전구

@@ -43,7 +43,7 @@ const DEBUG = new URLSearchParams(location.search).get('rv'); // ?rv=1.5 처럼 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.92;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
@@ -102,17 +102,26 @@ const comps = [0, 1, 2, 3].map((c) => {
 });
 
 const propCache = {};
+// 랜딩에서는 반사를 눌러 줍니다. (유광 타일 · 대리석이 조명 각도에 따라 번쩍이지 않게)
+function soft(mat) {
+  if (mat.userData.soft) return mat;
+  mat.userData.soft = true;
+  mat.userData.roughMul = 1.45;
+  if (mat.roughnessMap) mat.roughness *= 1.45;
+  mat.envMapIntensity *= 0.55;
+  return mat;
+}
 function dress(c, i) {
   const comp = comps[c];
   if (comp.room === i) return;
   comp.room = i;
   const r = ROOMS[i];
-  comp.floor.material[1] = getMaterial(BY_ID[r.floor]).mat;
-  comp.back.material[4] = getMaterial(BY_ID[r.back]).mat;
-  comp.left.material[0] = getMaterial(BY_ID[r.left]).mat;
+  comp.floor.material[1] = soft(getMaterial(BY_ID[r.floor]).mat);
+  comp.back.material[4] = soft(getMaterial(BY_ID[r.back]).mat);
+  comp.left.material[0] = soft(getMaterial(BY_ID[r.left]).mat);
   comp.props.clear();
   const mood = MOOD[r.id];
-  propCache[i] ||= buildProps(r.props, r.counter ? getMaterial(BY_ID[r.counter]).mat : C.white, { wallLen: R, glowColor: mood.glow, glowIntensity: mood.gi });
+  propCache[i] ||= buildProps(r.props, r.counter ? soft(getMaterial(BY_ID[r.counter]).mat) : C.white, { wallLen: R, glowColor: mood.glow, glowIntensity: mood.gi });
   comp.props.add(propCache[i]);
   // 이 방 조명 자리 잡기 (가구 좌표 → 칸 좌표)
   const info = propCache[i].userData, o = comp.props.position;
@@ -180,7 +189,7 @@ setRoom(0);
 
 // ---------- 후처리: 전구만 은은하게 번지게 ----------
 let composer = null;
-const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.45, 0.5, 1.0);
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.32, 0.45, 1.25);
 composer = new EffectComposer(renderer);
 composer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 860 ? 1.25 : 1.6));
 composer.addPass(new RenderPass(scene, camera));
@@ -239,7 +248,7 @@ function start() {
   gsap.from(section.querySelectorAll('.rv-copy > *'), { y: 30, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.07, delay: 0.5 });
 }
 manager.onLoad = start;
-setTimeout(start, 3500);
+setTimeout(start, 9000); // 느린 연결이면 늦게라도 엽니다
 
 // ---------- 매 프레임 ----------
 const colA = new THREE.Color(), colB = new THREE.Color();
@@ -296,7 +305,7 @@ function frame() {
   const mA = MOOD[ROOMS[clamp(base, 0, N - 1)].id], mB = MOOD[ROOMS[clamp(base + 1, 0, N - 1)].id];
   const fe = ease(f);
   key.color.set(mA.key).lerp(colB.set(mB.key), fe);
-  key.intensity = 46 * THREE.MathUtils.lerp(mA.ki, mB.ki, fe) * (1 - 0.35 * bump);
+  key.intensity = 34 * THREE.MathUtils.lerp(mA.ki, mB.ki, fe) * (1 - 0.35 * bump);
 
   // 배경색: 지금 방 → 다음 방
   colA.set(THEME[ROOMS[clamp(base, 0, N - 1)].id][0]);
