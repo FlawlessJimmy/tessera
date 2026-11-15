@@ -1348,7 +1348,8 @@ em { font-weight: inherit; }
   .sp-room { margin-top: 8px; }
   .sp-line { font-size: 14.5px; margin-top: 6px; }
   .sp-go { margin-top: 14px; height: 44px; font-size: 14px; }
-  .sp-card { --w: min(58vw, 260px); }
+  .sp-card { --w: min(56vw, 250px, 30svh); }
+  .sp-drum { min-height: 0; perspective: 900px; }
 }
 
 .look-viz img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; transition: transform 0.8s var(--ease); }

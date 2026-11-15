@@ -111,6 +111,7 @@ function spRender(pos) {
 }
 spRender(0);
 
+const spMobile = matchMedia('(max-width: 860px)');
 let spTarget = 0, spPos = 0;
 const spST = ScrollTrigger.create({
   trigger: '#spaces', start: 'top top', end: () => '+=' + innerHeight * 0.8 * (NS - 1), pin: true,
@@ -130,15 +131,18 @@ window.lenis?.on('scroll', () => {
 gsap.ticker.add(() => {
   spPos += (spTarget - spPos) * 0.08;
   if (Math.abs(spTarget - spPos) < 1e-4) spPos = spTarget;
-  const h = cards[0].offsetHeight || 400;
+  // 휴대폰에서는 글 아래에서 사진이 옆으로 넘어갑니다 (세로로 돌면 글을 가립니다)
+  const side = spMobile.matches;
+  const h = (side ? cards[0].offsetWidth : cards[0].offsetHeight) || 400;
   const R = h * 1.35;                  // 드럼 반지름
-  const step = (h * 1.06) / R;         // 사진 한 장이 차지하는 각도
+  const step = (h * (side ? 1.1 : 1.06)) / R; // 사진 한 장이 차지하는 각도
   cards.forEach((c, i) => {
     const th = (i - spPos) * step;
     const a = Math.abs(th);
     const vis = a > 1.75 ? 0 : 1 - Math.max(0, (a - 1.25) / 0.5);
-    // 안쪽으로 오목한 드럼: 위아래 사진이 화면 쪽으로 휘어져 다가옵니다
-    c.style.transform = `translate3d(0, ${R * Math.sin(th)}px, ${R * (1 - Math.cos(th)) * 0.5}px) rotateX(${(th * 180) / Math.PI}deg)`;
+    // 안쪽으로 오목한 드럼: 양 끝 사진이 화면 쪽으로 휘어져 다가옵니다
+    const deg = (th * 180) / Math.PI, d = R * (1 - Math.cos(th)) * 0.5, m = R * Math.sin(th);
+    c.style.transform = side ? `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg)` : `translate3d(0, ${m}px, ${d}px) rotateX(${deg}deg)`;
     c.style.opacity = vis;
     c.style.zIndex = 100 - Math.round(a * 20);
     c.style.filter = `brightness(${1 - Math.min(a, 1.4) * 0.32})`;
