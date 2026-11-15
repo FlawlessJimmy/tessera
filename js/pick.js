@@ -3,7 +3,6 @@
 import { MATERIALS, CATS, texPath, won } from './data.js';
 
 const ORDER = ['brick', 'wallpaper', 'tile', 'floor', 'paint', 'stone', 'panel'];
-const VERB = { brick: '쌓는 중', wallpaper: '바르는 중', tile: '붙이는 중', floor: '까는 중', paint: '칠하는 중', stone: '올리는 중', panel: '세우는 중' };
 const byCat = (k) => MATERIALS.filter((m) => m.cat === k).sort((a, b) => a.rank - b.rank);
 // 종류를 고르면 먼저 보여 줄 자재 (장면에서 결이 잘 보이는 것)
 const SHOW = { brick: 'red_brick', wallpaper: 'arch_terracotta', tile: 'zellige_green', floor: 'herringbone_parquet', paint: 'clay_plaster', stone: 'calacatta', panel: 'walnut_louver' };
@@ -67,6 +66,29 @@ function brickPalette(id) {
 const loaded = {};
 const preload = (id) => (loaded[id] ||= new Promise((res) => { const i = new Image(); i.onload = i.onerror = res; i.src = texPath(id, 'diff'); }));
 
+// 흙손을 쥔 주황 장갑 (200 × 150, 흙손 끝은 왼쪽 아래 (12, 132))
+const HAND_SVG = `<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg" overflow="visible" aria-hidden="true">
+  <defs>
+    <linearGradient id="trw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f6f8"/><stop offset="0.55" stop-color="#b8c0c7"/><stop offset="1" stop-color="#7d868e"/></linearGradient>
+    <linearGradient id="hdl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a86b3c"/><stop offset="1" stop-color="#6e4223"/></linearGradient>
+    <linearGradient id="glv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff9a4a"/><stop offset="1" stop-color="#ec5d00"/></linearGradient>
+  </defs>
+  <path d="M12 132 L104 96 Q114 104 113 126 Z" fill="url(#trw)" stroke="#5f676e" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M16 129 L102 98" stroke="#ffffff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+  <path d="M109 111 Q122 104 128 86" fill="none" stroke="#5f676e" stroke-width="6" stroke-linecap="round"/>
+  <g transform="translate(150 70) rotate(-36)">
+    <rect x="-36" y="-8" width="68" height="16" rx="8" fill="url(#hdl)"/>
+    <path d="M4 -14 L24 -4 L62 -56 L38 -70 Z" fill="#2b2b2b"/>
+    <path d="M2 -12 L25 -1 L33 -13 L10 -25 Z" fill="#f2ede6"/>
+    <rect x="-21" y="-20" width="42" height="36" rx="15" fill="url(#glv)"/>
+    <g fill="#ff8a33" stroke="#d65400" stroke-width="1.5">
+      <circle cx="-14" cy="13" r="6.8"/><circle cx="-4.5" cy="15" r="6.8"/><circle cx="5" cy="15" r="6.8"/><circle cx="14" cy="12.5" r="6.3"/>
+    </g>
+    <path d="M-20 -5 C-24 -17 -8 -23 7 -15 C13 -11 11 -4 4 -4 C-4 -4 -11 -1 -20 -5 Z" fill="#ff9442" stroke="#d65400" stroke-width="1.5"/>
+    <path d="M-13 -15 C-5 -19 5 -19 12 -15" fill="none" stroke="#ffffff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>`;
+
 // ---------- 장면 ----------
 // 모든 장면은 (무대, 자재, 타임라인)을 받아 DOM을 만들고 움직임을 타임라인에 넣습니다.
 // 조각들은 같은 텍스처를 제자리 좌표로 잘라 쓰기 때문에, 다 깔리고 나면 이음새 없이 한 장이 됩니다.
@@ -86,26 +108,59 @@ function piece(parent, m, x, y, w, h, S, W, H) {
 }
 
 const SCENES = {
-  // 벽돌: 아래 줄부터 한 장씩 얹히며 쌓임 (반장 엇갈려 쌓기)
+  // 벽돌: 주황 장갑 손이 흙손으로 시멘트를 한 줄 펴 바르면, 그 위에 벽돌이 한 장씩 톡톡 얹힙니다.
   async brick(scene, m, tl) {
     const pal = await brickPalette(m.id);
-    const wall = surface(scene, 'sf-brick', { left: '8%', right: '8%', top: '8%', bottom: '8%', background: pal.mortar });
-    const ROWS = 12, COLS = 5;
-    const bricks = [];
-    for (let r = ROWS - 1; r >= 0; r--) {
-      const odd = (ROWS - 1 - r) % 2 === 1;
-      const cells = odd ? [-0.5, ...Array.from({ length: COLS }, (_, k) => k + 0.5)] : Array.from({ length: COLS }, (_, k) => k);
-      cells.forEach((c) => {
-        const x0 = Math.max(0, c), x1 = Math.min(COLS, c + 1);
-        if (x1 - x0 <= 0.05) return;
-        const b = document.createElement('i');
-        b.style.cssText = `left:calc(${(x0 / COLS) * 100}% + 3px);width:calc(${((x1 - x0) / COLS) * 100}% - 6px);` +
-          `top:calc(${(r / ROWS) * 100}% + 3px);height:calc(${100 / ROWS}% - 6px);background-color:${pal.bricks[Math.floor(Math.random() * pal.bricks.length)]}`;
-        wall.appendChild(b);
-        bricks.push(b);
+    const W = scene.clientWidth, Hs = scene.clientHeight;
+    const gH = Hs * 0.13;
+    // 바닥 기초 + 시멘트 통
+    const ground = document.createElement('div'); ground.className = 'br-ground'; scene.appendChild(ground);
+    const tub = document.createElement('div'); tub.className = 'br-tub'; tub.innerHTML = '<i></i>';
+    Object.assign(tub.style, { right: `${W * 0.05}px`, bottom: `${gH - 2}px`, width: `${W * 0.15}px`, height: `${W * 0.085}px` });
+    tub.firstChild.style.background = pal.mortar;
+    scene.appendChild(tub);
+
+    const ROWS = 8, COLS = 4;
+    const wallW = W * 0.64, bw = wallW / COLS, ch = bw / 2.35, j = Math.max(4, bw * 0.075);
+    const x0 = (W - wallW) / 2 - W * 0.05;
+    // 손(흙손을 쥔 주황 장갑). 흙손 끝이 (12, 132) 자리에 오도록 맞춥니다.
+    const hand = document.createElement('div'); hand.className = 'br-hand'; hand.innerHTML = HAND_SVG;
+    const hs = (bw * 2.5) / 200;
+    Object.assign(hand.style, { width: `${200 * hs}px`, height: `${150 * hs}px` });
+    scene.appendChild(hand);
+    const at = (x, y) => ({ x: x - 12 * hs, y: y - 132 * hs });
+    gsap.set(hand, { ...at(x0 - bw * 0.6, Hs - gH - ch * 2.5), rotation: -6, opacity: 0, transformOrigin: `${12 * hs}px ${132 * hs}px` });
+    tl.to(hand, { opacity: 1, duration: 0.3 });
+
+    for (let r = 0; r < ROWS; r++) {
+      const odd = r % 2 === 1;
+      const xs = x0 + (odd ? -bw / 2 : 0);
+      const top = Hs - gH - (r + 1) * ch;
+      // 이 줄 시멘트 (흙손이 지나간 만큼 드러남)
+      const bed = document.createElement('div'); bed.className = 'br-bed';
+      Object.assign(bed.style, { left: `${xs - 1}px`, top: `${top}px`, width: `${COLS * bw + 2}px`, height: `${ch}px`, backgroundColor: pal.mortar });
+      scene.insertBefore(bed, hand);
+      gsap.set(bed, { clipPath: 'inset(0% 100% 0% 0%)' });
+      const bricks = Array.from({ length: COLS }, (_, k) => {
+        const b = document.createElement('i'); b.className = 'br-brick';
+        Object.assign(b.style, { left: `${xs + k * bw + j / 2}px`, top: `${top}px`, width: `${bw - j}px`, height: `${ch - j}px`, backgroundColor: pal.bricks[Math.floor(Math.random() * pal.bricks.length)] });
+        scene.insertBefore(b, hand);
+        return b;
       });
+      const y = top + ch - j * 0.8;
+      // 줄 시작으로 이동 (앞 줄 벽돌이 놓이는 동안 겹쳐서)
+      tl.to(hand, { ...at(xs - bw * 0.15, y), rotation: -6, duration: r ? 0.42 : 0.55, ease: 'power2.inOut' }, r ? `b${r - 1}+=0.08` : '>');
+      // 쓱— 시멘트 펴 바르기 (흙손을 살짝 까딱이며)
+      tl.addLabel(`s${r}`)
+        .to(bed, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.48, ease: 'none' }, `s${r}`)
+        .to(hand, { x: at(xs + COLS * bw, y).x, duration: 0.48, ease: 'none' }, `s${r}`)
+        .to(hand, { keyframes: [{ rotation: -13, y: at(0, y - 3).y, duration: 0.14 }, { rotation: -4, y: at(0, y).y, duration: 0.14 }, { rotation: -13, y: at(0, y - 3).y, duration: 0.13 }, { rotation: -6, y: at(0, y).y, duration: 0.14 }] }, `s${r}`)
+        .addLabel(`b${r}`)
+        // 톡톡: 벽돌이 위에서 내려와 자리 잡기
+        .from(bricks, { y: -bw * 0.55, opacity: 0, rotation: () => rnd(-6, 6), duration: 0.36, ease: 'back.out(2.2)', stagger: 0.075 }, `b${r}`);
     }
-    tl.from(bricks, { y: () => -rnd(60, 110), opacity: 0, duration: 0.55, ease: 'back.out(1.5)', stagger: 0.045 });
+    // 다 쌓으면 손이 위로 빠짐
+    tl.to(hand, { y: `-=${Hs * 0.35}`, x: `+=${W * 0.12}`, rotation: 10, opacity: 0, duration: 0.6, ease: 'power2.in' }, `b${ROWS - 1}+=0.25`);
   },
 
   // 벽지: 한 폭씩 위에서 펼쳐지고, 솔이 쓱싹 밀어 붙임
@@ -216,10 +271,9 @@ const SCENES = {
 // ---------- 화면 ----------
 export function mountPick({ stage, list }) {
   stage.innerHTML = `
-    <div class="ps-box"><div class="ps-scene"></div><span class="ps-status"><i></i><span></span></span></div>
+    <div class="ps-box"><div class="ps-scene"></div></div>
     <a class="ps-cap" href="#"><span class="ps-cap-name"></span><span class="ps-cap-meta"></span><span class="ps-cap-go">자세히 보기 →</span></a>`;
   const sceneEl = stage.querySelector('.ps-scene');
-  const status = stage.querySelector('.ps-status span');
   const cap = stage.querySelector('.ps-cap');
 
   list.innerHTML = ORDER.map((k) => {
@@ -255,7 +309,6 @@ export function mountPick({ stage, list }) {
     // 무대 글자
     stage.dataset.cat = m.cat;
     stage.classList.remove('is-done');
-    status.textContent = VERB[m.cat];
     cap.href = `material.html?id=${m.id}`;
     cap.querySelector('.ps-cap-name').textContent = m.ko;
     cap.querySelector('.ps-cap-meta').textContent = `${CATS[m.cat].ko} · ㎡당 ${won(m.perSqm)}원`;
@@ -277,7 +330,6 @@ export function mountPick({ stage, list }) {
   function done(my) {
     if (my !== token) return;
     stage.classList.add('is-done');
-    status.textContent = '완성';
     if (!auto) return;
     // 아무것도 누르지 않았으면 다음 종류로 넘어갑니다.
     holdCall = gsap.delayedCall(2.8, () => {

@@ -222,6 +222,8 @@ window.lenis?.on('scroll', () => {
 });
 const go = (i) => window.lenis?.scrollTo(yOf(clamp(i, 0, N - 1)), { duration: 2.1, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
 dots.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go([...dots.children].indexOf(b)); });
+// 가운데 아래 버튼: 랜딩을 건너뛰고 바로 아래 내용으로
+$('#rvSkip').addEventListener('click', () => window.lenis?.scrollTo(document.querySelector('.dark-flow') || st.end + innerHeight, { duration: 1.8, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) }));
 $('#rvPrev').addEventListener('click', () => go(Math.round(target) - 1));
 $('#rvNext').addEventListener('click', () => (Math.round(target) >= N - 1 ? window.lenis?.scrollTo(st.end + 2, { duration: 1 }) : go(Math.round(target) + 1)));
 
