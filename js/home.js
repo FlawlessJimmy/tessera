@@ -1,6 +1,6 @@
 // 홈 아래쪽: 바뀌는 한 단어 · 고르는 순간 깔리는 자재 · 공간 모자이크 · 자재로 완성한 방
 import { MATERIALS, ROOMS, texPath } from './data.js';
-import { mountPick } from './pick.js?v=3';
+import { mountPick } from './pick.js?v=4';
 
 const $ = (s) => document.querySelector(s);
 const thumb = (id) => `background-image:url(${texPath(id, 'thumb')})`;
