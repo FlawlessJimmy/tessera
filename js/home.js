@@ -143,7 +143,9 @@ gsap.ticker.add(() => {
     const vis = a > 1.75 ? 0 : 1 - Math.max(0, (a - 1.25) / 0.5);
     // 안쪽으로 오목한 드럼: 양 끝 사진이 화면 쪽으로 휘어져 다가옵니다
     const deg = (th * 180) / Math.PI, d = R * (1 - Math.cos(th)) * 0.5, m = R * Math.sin(th);
-    c.style.transform = side ? `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg)` : `translate3d(0, ${m}px, ${d}px) rotateX(${deg}deg)`;
+    // 위 · 아래로 갈수록 사진을 옆으로 넓혀, 휘어지며 좁아 보이지 않고 시원하게 펼쳐지도록
+    const wide = 1 + Math.min(a, 1.2) * 0.32;
+    c.style.transform = side ? `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg) scaleY(${1 + Math.min(a, 1.2) * 0.12})` : `translate3d(0, ${m}px, ${d}px) rotateX(${deg}deg) scaleX(${wide})`;
     c.style.opacity = vis;
     c.style.zIndex = 100 - Math.round(a * 20);
     c.style.filter = `brightness(${1 - Math.min(a, 1.4) * 0.32})`;
