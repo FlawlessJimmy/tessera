@@ -171,9 +171,9 @@ function setRoom(i) {
   if (first || reduce) { fill(i); return; }
   const rows = section.querySelectorAll('.rv-swap');
   gsap.timeline()
-    .to(rows, { yPercent: -110 * dir, opacity: 0, duration: 0.28, ease: 'power2.in', stagger: 0.025, overwrite: true })
+    .to(rows, { yPercent: -110 * dir, opacity: 0, duration: 0.4, ease: 'power2.in', stagger: 0.025, overwrite: true })
     .add(() => fill(shown))
-    .fromTo(section.querySelectorAll('.rv-swap'), { yPercent: 110 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: 'power3.out', stagger: 0.04 })
+    .fromTo(section.querySelectorAll('.rv-swap'), { yPercent: 110 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.85, ease: 'power3.out', stagger: 0.06 })
     .fromTo(listEl.children, { x: 24, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.05 }, '<0.1');
 }
 setRoom(0);
@@ -204,7 +204,7 @@ new ResizeObserver(resize).observe(canvas);
 // ---------- 스크롤 → 위치 ----------
 let target = 0, pos = 0;
 const st = ScrollTrigger.create({
-  trigger: section, start: 'top top', end: () => '+=' + innerHeight * 0.9 * (N - 1),
+  trigger: section, start: 'top top', end: () => '+=' + innerHeight * 1.35 * (N - 1),
   pin: true, refreshPriority: 1,
   onUpdate: (s) => { target = s.progress * (N - 1); },
 });
@@ -217,10 +217,10 @@ window.lenis?.on('scroll', () => {
   if (y <= st.start + 2 || y >= st.end - 2) return;
   snapT = setTimeout(() => {
     const i = Math.round(target);
-    if (Math.abs(target - i) > 0.01) window.lenis.scrollTo(yOf(i), { duration: 0.9, easing: (t) => 1 - Math.pow(1 - t, 3) });
-  }, 140);
+    if (Math.abs(target - i) > 0.01) window.lenis.scrollTo(yOf(i), { duration: 1.6, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
+  }, 220);
 });
-const go = (i) => window.lenis?.scrollTo(yOf(clamp(i, 0, N - 1)), { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
+const go = (i) => window.lenis?.scrollTo(yOf(clamp(i, 0, N - 1)), { duration: 2.1, easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2) });
 dots.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) go([...dots.children].indexOf(b)); });
 $('#rvPrev').addEventListener('click', () => go(Math.round(target) - 1));
 $('#rvNext').addEventListener('click', () => (Math.round(target) >= N - 1 ? window.lenis?.scrollTo(st.end + 2, { duration: 1 }) : go(Math.round(target) + 1)));
@@ -253,7 +253,7 @@ function frame() {
   if (!visible) return;
   const t = clock.getElapsedTime();
   if (DEBUG !== null) { target = +DEBUG; intro.k = 0; }
-  pos += (target - pos) * (reduce || DEBUG !== null ? 1 : 0.085);
+  pos += (target - pos) * (reduce || DEBUG !== null ? 1 : 0.042); // 낮을수록 천천히 따라감
   if (Math.abs(target - pos) < 1e-4) pos = target;
   smx += (mx - smx) * 0.04; smy += (my - smy) * 0.04;
 
