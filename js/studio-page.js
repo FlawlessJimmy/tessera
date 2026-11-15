@@ -1,5 +1,5 @@
 // 스튜디오 페이지: 자재 줄에서 골라 바로 깔아 보기
-import { mountStudio } from './studio-ui.js?v=2';
+import { mountStudio } from './studio-ui.js?v=3';
 
 const params = new URLSearchParams(location.search);
 const go = document.getElementById('toDetail');

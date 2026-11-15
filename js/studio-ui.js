@@ -5,6 +5,7 @@ import { createStudio } from './viewer.js?v=3';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const T = (s) => (window.i18n ? window.i18n.t(s) : s); // 영어 화면이면 영어로
 
 const MARKUP = (withRail) => `
   <div class="studio-bar">
@@ -126,7 +127,7 @@ export function mountStudio(root, { id = 'terrazzo_white', mode = 'sample', rail
     F('area').textContent = `${r.area.toFixed(1)}㎡`;
     F('qty').textContent = `${r.qty}${m.unit.replace(/^1/, '').replace(/\(.*\)/, '') || '개'} · 로스 ${Math.round(m.loss * 100)}% 포함`;
     const o = { v: shownTotal };
-    gsap.to(o, { v: r.total, duration: 0.5, ease: 'power3.out', onUpdate: () => { F('total').textContent = won(o.v) + '원'; }, onComplete: () => { shownTotal = r.total; } });
+    gsap.to(o, { v: r.total, duration: 0.5, ease: 'power3.out', onUpdate: () => { F('total').textContent = T(won(o.v) + '원'); }, onComplete: () => { shownTotal = r.total; } });
     F('calcNote').textContent = {
       room: `벽 면적은 바닥 ${v}평의 약 ${WALL_RATIO}배로 어림했습니다 (천장 높이 2.3m 기준). 시공비 · 부자재 · 배송비는 별도입니다.`,
       floor: '시공비 · 접착제 · 걸레받이 · 배송비는 별도입니다. 실제 견적은 실측 후 달라질 수 있습니다.',
@@ -140,7 +141,8 @@ export function mountStudio(root, { id = 'terrazzo_white', mode = 'sample', rail
     railEl && $$('[data-id]', railEl).forEach((b) => b.classList.toggle('is-on', b.dataset.id === m.id));
     setSurfaceTab(studio.setMaterial(m));
     const c = cfg();
-    F('cat').textContent = `${CATS[m.cat].ko} · ${CATS[m.cat].en}`;
+    // 영어 화면에서는 종류 이름이 두 번 나오지 않게 한 번만
+    F('cat').textContent = window.i18n?.isEn ? window.i18n.t(CATS[m.cat].ko) : `${CATS[m.cat].ko} · ${CATS[m.cat].en}`;
     F('ko').textContent = m.ko;
     F('en').textContent = m.en;
     F('tags').innerHTML = [...m.spaces.map((s) => `<span>${s}</span>`), `<span>${m.finish}</span>`, `<span><i style="background:${COLORS[m.color]}"></i>${m.color}</span>`].join('');

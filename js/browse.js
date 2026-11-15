@@ -23,10 +23,14 @@ const GROUPS = [
 ];
 const label = (g, v) => GROUPS.find((x) => x.key === g).options.find((o) => o.v === v)?.label || v;
 
+// 영어 화면에서는 영어 이름 · 종류 · 공간 · 색 · 마감으로도 찾을 수 있게
+const enText = (m) => [m.ko, CATS[m.cat].ko, ...m.spaces, m.color, m.finish, m.surface, m.note].map((s) => window.i18n.t(s)).join(' ').toLowerCase();
+const findText = (m) => (window.i18n?.isEn ? searchText(m) + ' ' + enText(m) : searchText(m));
+
 function matches(m, skip) {
   if (skip !== 'cat' && state.cat !== 'all' && m.cat !== state.cat) return false;
   if (state.q) {
-    const t = searchText(m);
+    const t = findText(m);
     if (!state.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => t.includes(w))) return false;
   }
   return GROUPS.every((g) => g.key === skip || !state[g.key].length || state[g.key].some((v) => g.test(m, v)));
@@ -44,6 +48,7 @@ function syncURL() {
   if (state.q) p.set('q', state.q);
   if (state.sort !== 'popular') p.set('sort', state.sort);
   GROUPS.forEach((g) => state[g.key].length && p.set(g.key, state[g.key].join(',')));
+  if (params.get('lang')) p.set('lang', params.get('lang')); // 언어 유지
   history.replaceState(null, '', p.toString() ? `?${p}` : location.pathname);
 }
 
@@ -132,6 +137,7 @@ function update() {
   grid.innerHTML = list.map((m) => cardHTML(m)).join('');
   $('#empty').hidden = list.length > 0;
   $('#total').textContent = `${list.length}`;
+  if (window.i18n?.isEn) $('#total').nextSibling.textContent = list.length === 1 ? ' material' : ' materials';
   renderFilters(); renderChips(); syncURL();
   gsap.fromTo(grid.children, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.025, ease: 'power3.out', overwrite: true });
   ScrollTrigger.refresh();

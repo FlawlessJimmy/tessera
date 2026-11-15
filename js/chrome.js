@@ -17,6 +17,8 @@
         ${TABS.slice(1).map((t) => `<a href="${t.href}"${t.key === page ? ' aria-current="page"' : ''}>${t.label}</a>`).join('')}
         <a href="materials.html?focus=search" class="nav-search" aria-label="자재 검색"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></a>
       </nav>`;
+    // 언어 바꾸기 (KOR · EN): 검색 아이콘 오른쪽
+    window.i18n?.mountToggle(header.querySelector('.nav-links'), { className: 'nav-lang' });
   }
 
   const bar = document.createElement('nav');

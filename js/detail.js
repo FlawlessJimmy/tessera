@@ -1,6 +1,6 @@
 // 자재 상세: 스튜디오 + 판매처 비교 + 같이 쓰면 좋은 자재 + 이 자재를 쓴 방 + 같은 종류
 import { MATERIALS, BY_ID, CATS, ROOMS, texPath, won, shopLinks, roomsUsing, roomTotal } from './data.js';
-import { mountStudio } from './studio-ui.js?v=2';
+import { mountStudio } from './studio-ui.js?v=3';
 import { cardHTML } from './cards.js?v=2';
 import { lookHTML } from './looks.js?v=2';
 
@@ -8,7 +8,7 @@ const $ = (s) => document.querySelector(s);
 const params = new URLSearchParams(location.search);
 const m = BY_ID[params.get('id')] || BY_ID.terrazzo_white;
 
-document.title = `${m.ko} · Tessera`;
+document.title = `${window.i18n ? window.i18n.t(m.ko) : m.ko} · Tessera`;
 $('#crumb').insertAdjacentHTML('beforeend', `<span>/</span><a href="materials.html?cat=${m.cat}">${CATS[m.cat].ko}</a><span>/</span>${m.ko}`);
 
 mountStudio($('#studio'), { id: m.id, mode: params.get('mode') || 'sample' });

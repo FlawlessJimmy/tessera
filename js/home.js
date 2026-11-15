@@ -11,7 +11,8 @@ const WORDS = [['마루', 'herringbone_parquet'], ['타일', 'zellige_green'], [
 const SAMPLES = WORDS.map(([, id]) => MATERIALS.find((m) => m.id === id));
 const loop = $('#kwLoop');
 const rack = $('#kwIcon');
-loop.innerHTML = WORDS.map(([w]) => `<span class="kw-word">${w}</span>`).join('');
+const T = (s) => (window.i18n ? window.i18n.t(s) : s); // 영어 화면이면 영어로
+loop.innerHTML = WORDS.map(([w]) => `<span class="kw-word">${T(w)}</span>`).join('');
 rack.innerHTML = `
   <div class="kr-stage">${SAMPLES.map((m, i) => `
     <a class="kr-card" href="material.html?id=${m.id}" style="--i:${i};--side:${m.side}" aria-label="${m.ko}">
