@@ -60,8 +60,9 @@ addEventListener('resize', () => { gsap.set(loop, { width: words[wi].offsetWidth
 // ---------- 고르는 순간 깔리는 자재 ----------
 mountPick({ stage: $('#pickStage'), list: $('#pickList') });
 
-// ---------- 공간으로 찾기: 방 사진이 드럼처럼 말려 올라갑니다 ----------
-// 가운데 사진은 정면, 위로 지나간 사진은 위쪽으로, 올라오는 사진은 아래쪽에서 휘어져 보입니다.
+// ---------- 공간으로 찾기: 방 사진이 바닥 → 벽 → 천장으로 꺾이며 지나갑니다 ----------
+// 상자 안쪽을 보듯, 아래에서 바닥에 누워 다가온 사진이 모서리에서 90도 꺾여 벽(정면)에 서고,
+// 위 모서리에서 다시 꺾여 천장으로 넘어갑니다. 모서리에 걸친 사진은 종이처럼 접혀 보입니다.
 const SPACES_SHOW = [
   { s: '거실', room: 'nordic', line: '가장 오래 머무는 곳이라 바닥은 따뜻하게, 벽은 차분하게 고릅니다.' },
   { s: '침실', room: 'japandi', line: '빛을 낮추고 결을 살린 자재로 편히 쉬는 방을 만듭니다.' },
@@ -70,7 +71,7 @@ const SPACES_SHOW = [
   { s: '현관', room: 'loft', line: '집의 첫인상입니다. 벽돌과 미장으로 들어서는 순간의 분위기를 정합니다.' },
 ];
 const drum = $('#spDrum');
-drum.innerHTML = SPACES_SHOW.map((x) => `<a class="sp-card" href="materials.html?space=${encodeURIComponent(x.s)}" aria-label="${x.s} 자재 보기"><img src="assets/rooms/${x.room}.jpg" alt="" loading="lazy" decoding="async" /></a>`).join('');
+drum.innerHTML = SPACES_SHOW.map((x) => `<a class="sp-card" href="materials.html?space=${encodeURIComponent(x.s)}" aria-label="${x.s} 자재 보기">${`<i class="sp-pane"><img src="assets/rooms/${x.room}.jpg" alt="" loading="lazy" decoding="async" /></i>`.repeat(3)}</a>`).join('');
 const cards = [...drum.children];
 const NS = SPACES_SHOW.length;
 const spCount = (s) => MATERIALS.filter((m) => m.spaces.includes(s)).length;
@@ -129,40 +130,54 @@ window.lenis?.on('scroll', () => {
     if (Math.abs(spTarget - i) > 0.01) window.lenis.scrollTo(spST.start + (i / (NS - 1)) * (spST.end - spST.start), { duration: 1.1, easing: (t) => 1 - Math.pow(1 - t, 3) });
   }, 200);
 });
+// 사진 한 장 = 판 세 개(천장 · 벽 · 바닥). 같은 사진을 세 판에 깔고, 각 판에 들어가는 부분만 잘라 보여 줍니다.
+const PANES = cards.map((c) => [...c.children]);
+const mat = (X, Y, Z, T) => `matrix3d(${X},0,${Y},0,${Z},0,${T},1)`;
+let spDim = null, spLast = NaN;
+const spMeasure = () => {
+  const p = PANES[0][1];
+  spDim = { w: p.offsetWidth || 300, h: p.offsetHeight || 366, persp: parseFloat(getComputedStyle(drum).perspective) || 900 };
+  spLast = NaN;
+};
+addEventListener('resize', () => { spDim = null; });
 gsap.ticker.add(() => {
   spPos += (spTarget - spPos) * 0.08;
   if (Math.abs(spTarget - spPos) < 1e-4) spPos = spTarget;
-  // 휴대폰에서는 글 아래에서 사진이 옆으로 넘어갑니다 (세로로 돌면 글을 가립니다)
+  if (!spDim) spMeasure();
+  if (spPos === spLast) return; // 멈춰 있으면 다시 그리지 않음
+  spLast = spPos;
+  // 휴대폰에서는 글 아래에서 옆으로: 오른쪽 벽 → 정면 → 왼쪽 벽 (세로로 돌면 글을 가립니다)
   const side = spMobile.matches;
-  const h = (side ? cards[0].offsetWidth : cards[0].offsetHeight) || 400; // 높이는 넓혀도 그대로
-  const R = h * 1.35;                  // 드럼 반지름
-  // 위 · 아래 사진 펼칠 폭: 화면 폭의 94%, 가운데는 화면 가운데로
-  const dr = drum.getBoundingClientRect();
-  const baseW = Math.min(360, Math.max(230, innerWidth * 0.23)); // CSS --w: clamp(230px, 23vw, 360px) 와 같은 값
-  const fullW = innerWidth * 0.94, shiftX = innerWidth / 2 - (dr.left + dr.width / 2);
-  const step = (h * (side ? 1.1 : 1.06)) / R; // 사진 한 장이 차지하는 각도
+  const { w, h, persp } = spDim;
+  const L = side ? w : h;          // 흐르는 방향의 사진 길이
+  const gap = L * 0.06;
+  const Hw = (L + gap) / 2;          // 정면 벽의 절반 (사진 한 장 + 틈)
+  // 화면 밖으로 나갈 만큼 깊은 부분은 그리지 않음
+  const edge = (side ? innerWidth : innerHeight) / 2 + 40;
+  const dMax = Math.max(0, persp * (1 - Hw / edge));
   cards.forEach((c, i) => {
-    const th = (i - spPos) * step;
-    const a = Math.abs(th);
-    const vis = a > 1.75 ? 0 : 1 - Math.max(0, (a - 1.25) / 0.5);
-    // 안쪽으로 오목한 드럼: 양 끝 사진이 화면 쪽으로 휘어져 다가옵니다
-    const deg = (th * 180) / Math.PI, d = R * (1 - Math.cos(th)) * 0.5, m = R * Math.sin(th);
-    if (side) {
-      c.style.transform = `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg)`;
-    } else {
-      // 위 · 아래 사진은 화면 거의 전체 폭으로 펼칩니다. 사진은 늘리지 않고 칸만 넓혀 비율을 지킵니다.
-      // 가운데 근처를 지날 때는 원래 폭이라 왼쪽 글을 가리지 않습니다.
-      let e = Math.min(1, Math.max(0, (a - 0.42) / 0.4));
-      e = e * e * (3 - 2 * e);
-      const wNow = baseW + (fullW - baseW) * e;
-      c.style.width = wNow + 'px';
-      c.style.marginLeft = -wNow / 2 + 'px';
-      c.style.transform = `translate3d(${shiftX * e}px, ${m}px, ${d}px) rotateX(${deg}deg)`;
-    }
-    c.style.opacity = vis;
-    c.style.zIndex = 100 - Math.round(a * 20);
-    c.style.filter = `brightness(${1 - Math.min(a, 1.4) * 0.32})`;
-    c.style.visibility = vis <= 0 ? 'hidden' : 'visible';
+    const u0 = (i - spPos) * (L + gap) - L / 2; // 사진 시작점 (정면 가운데 = 0)
+    const R = [
+      [Math.max(0, -Hw - u0 - dMax), Math.min(L, -Hw - u0)], // 천장(왼쪽)
+      [Math.max(0, -Hw - u0), Math.min(L, Hw - u0)],         // 정면 벽
+      [Math.max(0, Hw - u0), Math.min(L, dMax + Hw - u0)],   // 바닥(오른쪽)
+    ];
+    PANES[i].forEach((p, k) => {
+      const [a, b] = R[k];
+      if (b - a < 0.5) { if (p.style.visibility !== 'hidden') p.style.visibility = 'hidden'; return; }
+      p.style.visibility = 'visible';
+      if (!side) {
+        p.style.transform = k === 1 ? mat([1, 0, 0], [0, 1, 0], [0, 0, 1], [-w / 2, u0, 0])
+          : k === 2 ? mat([1, 0, 0], [0, 0, 1], [0, -1, 0], [-w / 2, Hw, u0 - Hw])
+          : mat([1, 0, 0], [0, 0, -1], [0, 1, 0], [-w / 2, -Hw, -Hw - u0]);
+        p.style.clipPath = `inset(${a}px 0 ${L - b}px 0)`;
+      } else {
+        p.style.transform = k === 1 ? mat([1, 0, 0], [0, 1, 0], [0, 0, 1], [u0, -h / 2, 0])
+          : k === 2 ? mat([0, 0, 1], [0, 1, 0], [-1, 0, 0], [Hw, -h / 2, u0 - Hw])
+          : mat([0, 0, -1], [0, 1, 0], [1, 0, 0], [-Hw, -h / 2, -Hw - u0]);
+        p.style.clipPath = `inset(0 ${L - b}px 0 ${a}px)`;
+      }
+    });
   });
   spRender(Math.max(0, Math.min(NS - 1, spPos)));
 });
