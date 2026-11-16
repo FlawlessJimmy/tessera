@@ -1395,3 +1395,7 @@ html[lang="en"] .sp-title { font-size: clamp(44px, 4.6vw, 70px); }
 html[lang="en"] .sp-title .sp-swap { white-space: nowrap; }
 @media (max-width: 860px) { html[lang="en"] .sp-title { font-size: 40px; } }
 @media (max-width: 720px) { html[lang="en"] .kw-title { font-size: 32px; } }
+
+/* 공간으로 찾기: 펼쳐진 위·아래 사진보다 왼쪽 글이 위에 */
+.sp-copy { position: relative; z-index: 5; }
+.sp-drum { z-index: 1; }

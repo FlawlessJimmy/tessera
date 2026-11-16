@@ -277,11 +277,12 @@ function start() {
   if (started) return;
   started = true;
   section.classList.add('is-ready');
-  gsap.to(intro, { k: 0, duration: reduce ? 0.01 : 2.6, ease: 'expo.out' });
+  gsap.to(intro, { k: 0, duration: reduce ? 0.01 : 2.2, ease: 'expo.out' });
   gsap.from(section.querySelectorAll('.rv-copy > *'), { y: 30, opacity: 0, duration: 1, ease: 'power3.out', stagger: 0.07, delay: 0.5 });
 }
+// 모든 자재 사진을 기다리지 않고 바로 엽니다. 사진이 오기 전에는 자재 바탕색으로 보이고, 오는 대로 채워집니다.
 manager.onLoad = start;
-setTimeout(start, 9000); // 느린 연결이면 늦게라도 엽니다
+requestAnimationFrame(() => setTimeout(start, 700));
 
 // ---------- 매 프레임 ----------
 const colA = new THREE.Color(), colB = new THREE.Color();

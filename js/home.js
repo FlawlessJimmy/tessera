@@ -134,8 +134,12 @@ gsap.ticker.add(() => {
   if (Math.abs(spTarget - spPos) < 1e-4) spPos = spTarget;
   // 휴대폰에서는 글 아래에서 사진이 옆으로 넘어갑니다 (세로로 돌면 글을 가립니다)
   const side = spMobile.matches;
-  const h = (side ? cards[0].offsetWidth : cards[0].offsetHeight) || 400;
+  const h = (side ? cards[0].offsetWidth : cards[0].offsetHeight) || 400; // 높이는 넓혀도 그대로
   const R = h * 1.35;                  // 드럼 반지름
+  // 위 · 아래 사진 펼칠 폭: 화면 폭의 94%, 가운데는 화면 가운데로
+  const dr = drum.getBoundingClientRect();
+  const baseW = Math.min(360, Math.max(230, innerWidth * 0.23)); // CSS --w: clamp(230px, 23vw, 360px) 와 같은 값
+  const fullW = innerWidth * 0.94, shiftX = innerWidth / 2 - (dr.left + dr.width / 2);
   const step = (h * (side ? 1.1 : 1.06)) / R; // 사진 한 장이 차지하는 각도
   cards.forEach((c, i) => {
     const th = (i - spPos) * step;
@@ -143,9 +147,18 @@ gsap.ticker.add(() => {
     const vis = a > 1.75 ? 0 : 1 - Math.max(0, (a - 1.25) / 0.5);
     // 안쪽으로 오목한 드럼: 양 끝 사진이 화면 쪽으로 휘어져 다가옵니다
     const deg = (th * 180) / Math.PI, d = R * (1 - Math.cos(th)) * 0.5, m = R * Math.sin(th);
-    // 위 · 아래로 갈수록 사진을 옆으로 넓혀, 휘어지며 좁아 보이지 않고 시원하게 펼쳐지도록
-    const wide = 1 + Math.min(a, 1.2) * 0.32;
-    c.style.transform = side ? `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg) scaleY(${1 + Math.min(a, 1.2) * 0.12})` : `translate3d(0, ${m}px, ${d}px) rotateX(${deg}deg) scaleX(${wide})`;
+    if (side) {
+      c.style.transform = `translate3d(${m}px, 0, ${d}px) rotateY(${-deg}deg)`;
+    } else {
+      // 위 · 아래 사진은 화면 거의 전체 폭으로 펼칩니다. 사진은 늘리지 않고 칸만 넓혀 비율을 지킵니다.
+      // 가운데 근처를 지날 때는 원래 폭이라 왼쪽 글을 가리지 않습니다.
+      let e = Math.min(1, Math.max(0, (a - 0.42) / 0.4));
+      e = e * e * (3 - 2 * e);
+      const wNow = baseW + (fullW - baseW) * e;
+      c.style.width = wNow + 'px';
+      c.style.marginLeft = -wNow / 2 + 'px';
+      c.style.transform = `translate3d(${shiftX * e}px, ${m}px, ${d}px) rotateX(${deg}deg)`;
+    }
     c.style.opacity = vis;
     c.style.zIndex = 100 - Math.round(a * 20);
     c.style.filter = `brightness(${1 - Math.min(a, 1.4) * 0.32})`;
